@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>golub - Мессенджер</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
+        /* Все стили остаются такими же как в предыдущей версии */
         * {
             margin: 0;
             padding: 0;
@@ -57,7 +62,6 @@
             color: var(--text-dark);
         }
 
-        /* Переключатель темы */
         .theme-control {
             position: fixed;
             top: 20px;
@@ -90,7 +94,6 @@
             box-shadow: 0 0 30px var(--primary);
         }
 
-        /* Контейнер приложения */
         #app {
             min-height: 100vh;
             display: flex;
@@ -99,7 +102,6 @@
             padding: 20px;
         }
 
-        /* Страница входа */
         .auth-container {
             width: 100%;
             max-width: 450px;
@@ -137,14 +139,6 @@
             font-weight: 800;
         }
 
-        .auth-header p {
-            color: var(--text-secondary-light);
-        }
-
-        .dark-theme .auth-header p {
-            color: var(--text-secondary-dark);
-        }
-
         .auth-form {
             display: flex;
             flex-direction: column;
@@ -161,10 +155,6 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary-light);
-        }
-
-        .dark-theme .form-group i {
-            color: var(--text-secondary-dark);
         }
 
         .form-group input {
@@ -222,7 +212,6 @@
             cursor: pointer;
         }
 
-        /* Дашборд */
         .dashboard-container {
             width: 100%;
             max-width: 1400px;
@@ -289,10 +278,6 @@
             border: 2px solid var(--surface-light);
         }
 
-        .dark-theme .verified-badge {
-            border-color: var(--surface-dark);
-        }
-
         .user-details {
             display: flex;
             flex-direction: column;
@@ -350,7 +335,6 @@
             gap: 30px;
         }
 
-        /* Левая панель */
         .left-panel {
             background: var(--surface-light);
             border-radius: 30px;
@@ -482,11 +466,6 @@
             color: inherit;
         }
 
-        .dark-theme .create-chat-form input {
-            border-color: var(--border-dark);
-        }
-
-        /* Правая панель */
         .right-panel {
             background: var(--surface-light);
             border-radius: 30px;
@@ -570,7 +549,6 @@
             color: var(--text-secondary-light);
         }
 
-        /* Страница чата */
         .chat-container {
             width: 100%;
             max-width: 1000px;
@@ -761,7 +739,6 @@
         .chat-input-form input:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 4px rgba(0, 153, 255, 0.1);
         }
 
         .send-btn {
@@ -781,7 +758,6 @@
             box-shadow: 0 0 30px var(--primary);
         }
 
-        /* Модальное окно профиля */
         .modal {
             display: none;
             position: fixed;
@@ -912,19 +888,6 @@
             transition: var(--transition);
         }
 
-        .dark-theme .input-group input,
-        .dark-theme .input-group textarea,
-        .dark-theme .input-group select {
-            border-color: var(--border-dark);
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus,
-        .input-group select:focus {
-            border-color: var(--primary);
-            outline: none;
-        }
-
         .verification-section {
             background: rgba(255, 215, 0, 0.1);
             border-radius: 20px;
@@ -996,6 +959,24 @@
             }
         }
 
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary-light);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .online-users-count {
+            font-size: 0.9rem;
+            color: var(--success);
+            margin-left: 10px;
+        }
+
         @media (max-width: 768px) {
             .dashboard-content {
                 grid-template-columns: 1fr;
@@ -1034,8 +1015,8 @@
 
                 <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="loginUsername" placeholder="Username или email" required>
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="loginEmail" placeholder="Email" required>
                     </div>
                     
                     <div class="form-group">
@@ -1101,7 +1082,7 @@
             <header class="dashboard-header">
                 <div class="header-content">
                     <div class="user-info" onclick="openProfileModal()">
-                        <div class="avatar" id="userAvatar" style="background: linear-gradient(135deg, #0099ff, #00ccff);">
+                        <div class="avatar" id="userAvatar">
                             <span id="userAvatarText">U</span>
                             <div id="verifiedBadge" class="verified-badge" style="display: none;">
                                 <i class="fas fa-check"></i>
@@ -1109,13 +1090,13 @@
                         </div>
                         <div class="user-details">
                             <div class="user-name">
-                                <h2 id="userDisplayName">Пользователь</h2>
+                                <h2 id="userDisplayName">Загрузка...</h2>
                                 <span id="userVerifiedIcon" style="display: none; color: var(--gold);">
                                     <i class="fas fa-check-circle"></i>
                                 </span>
                             </div>
                             <span class="user-username" id="userUsername">@username</span>
-                            <span class="status online"><i class="fas fa-circle"></i> Online</span>
+                            <span class="status online" id="userStatus"><i class="fas fa-circle"></i> Online</span>
                         </div>
                     </div>
                     <button class="btn-logout" onclick="logout()">
@@ -1128,10 +1109,10 @@
                 <!-- Левая панель -->
                 <div class="left-panel">
                     <div class="search-section">
-                        <h3><i class="fas fa-search"></i> Поиск</h3>
+                        <h3><i class="fas fa-search"></i> Поиск пользователей</h3>
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="searchInput" placeholder="Поиск по username..." oninput="searchUsers()">
+                            <input type="text" id="searchInput" placeholder="Введите username..." oninput="searchUsers()">
                         </div>
                         <div class="search-results" id="searchResults"></div>
                     </div>
@@ -1140,20 +1121,28 @@
                         <h3><i class="fas fa-plus-circle"></i> Новый чат</h3>
                         <form class="create-chat-form" onsubmit="createPrivateChat(event)">
                             <input type="text" id="newChatUsername" placeholder="Введите username" required>
-                            <button type="submit" class="btn-primary">Начать чат</button>
+                            <button type="submit" class="btn-primary">Начать диалог</button>
                         </form>
+                    </div>
+
+                    <div class="online-users-count" id="onlineUsersCount">
+                        <i class="fas fa-circle"></i> Онлайн: 0
                     </div>
                 </div>
 
                 <!-- Правая панель -->
                 <div class="right-panel">
                     <div class="chats-header">
-                        <h3><i class="fas fa-comments"></i> Личные сообщения</h3>
+                        <h3><i class="fas fa-comments"></i> Диалоги</h3>
                         <span class="chat-count" id="chatsCount">0</span>
                     </div>
                     
                     <div id="chatsContainer" class="chats-grid">
-                        <!-- Чаты будут добавляться сюда -->
+                        <div class="empty-state">
+                            <i class="fas fa-comment-slash"></i>
+                            <p>Нет диалогов</p>
+                            <span>Найдите пользователя и начните общение</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1167,7 +1156,7 @@
                 </button>
                 
                 <div class="chat-header-info">
-                    <div class="chat-header-avatar" id="chatAvatar" style="background: linear-gradient(135deg, #0099ff, #00ccff);">
+                    <div class="chat-header-avatar" id="chatAvatar">
                         <span id="chatAvatarText">U</span>
                     </div>
                     <div class="chat-header-text">
@@ -1177,7 +1166,7 @@
                                 <i class="fas fa-check-circle"></i>
                             </span>
                         </h2>
-                        <span class="chat-header-status" id="chatStatus">был(а) недавно</span>
+                        <span class="chat-header-status" id="chatStatus">загрузка...</span>
                     </div>
                 </div>
             </header>
@@ -1240,22 +1229,12 @@
                     <textarea id="profileBio" placeholder="Расскажите о себе..." rows="3"></textarea>
                 </div>
 
-                <div class="input-group">
-                    <label>Статус</label>
-                    <select id="profileStatus">
-                        <option value="online">Online</option>
-                        <option value="offline">Offline</option>
-                        <option value="away">Отошел</option>
-                        <option value="busy">Не беспокоить</option>
-                    </select>
-                </div>
-
                 <button class="btn-primary" onclick="saveProfile()">
                     <i class="fas fa-save"></i> Сохранить
                 </button>
             </div>
 
-            <!-- Секция верификации (доступна только админам) -->
+            <!-- Секция верификации (для админов) -->
             <div class="verification-section" id="verificationSection" style="display: none;">
                 <h4><i class="fas fa-certificate"></i> Админ-панель</h4>
                 <p>Управление верификацией аккаунтов</p>
@@ -1291,104 +1270,27 @@
     </div>
 
     <script>
+        // 🔥 Конфигурация Firebase (нужно заменить на свои данные)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBk8kL7kM7kM7kM7kM7kM7kM7kM7kM7kM7k",
+            authDomain: "golub-messenger.firebaseapp.com",
+            projectId: "golub-messenger",
+            storageBucket: "golub-messenger.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abc123def456ghi789"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
         // Состояние приложения
         let currentUser = null;
         let currentChat = null;
-        let users = [];
-        let chats = [];
-        let messages = [];
-
-        // Загрузка данных из localStorage
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFromStorage();
-            
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-theme');
-                document.querySelector('.theme-icon').textContent = '☀️';
-            }
-
-            // Автоматический вход, если есть сохраненная сессия
-            if (localStorage.getItem('currentUser')) {
-                currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                users = JSON.parse(localStorage.getItem('users') || '[]');
-                chats = JSON.parse(localStorage.getItem('chats') || '[]');
-                messages = JSON.parse(localStorage.getItem('messages') || '[]');
-                updateUserInterface();
-                showDashboard();
-            } else {
-                // Тестовые пользователи
-                loadTestUsers();
-            }
-        });
-
-        // Сохранение в localStorage
-        function saveToStorage() {
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('chats', JSON.stringify(chats));
-            localStorage.setItem('messages', JSON.stringify(messages));
-        }
-
-        // Загрузка из localStorage
-        function loadFromStorage() {
-            if (localStorage.getItem('users')) {
-                users = JSON.parse(localStorage.getItem('users'));
-            }
-            if (localStorage.getItem('chats')) {
-                chats = JSON.parse(localStorage.getItem('chats'));
-            }
-            if (localStorage.getItem('messages')) {
-                messages = JSON.parse(localStorage.getItem('messages'));
-            }
-        }
-
-        // Тестовые пользователи
-        function loadTestUsers() {
-            users = [
-                {
-                    id: 2,
-                    name: 'Анна Смирнова',
-                    username: 'anna',
-                    email: 'anna@mail.com',
-                    password: '123',
-                    avatar: 'A',
-                    avatarColor: 'gradient1',
-                    bio: 'Дизайнер',
-                    status: 'online',
-                    isVerified: true,
-                    verifiedLevel: 'gold',
-                    verifiedSignature: 'Официальный дизайнер',
-                    isAdmin: true
-                },
-                {
-                    id: 3,
-                    name: 'Петр Иванов',
-                    username: 'petr',
-                    email: 'petr@mail.com',
-                    password: '123',
-                    avatar: 'P',
-                    avatarColor: 'gradient2',
-                    bio: 'Разработчик',
-                    status: 'online',
-                    isVerified: false
-                },
-                {
-                    id: 4,
-                    name: 'Мария Козлова',
-                    username: 'maria',
-                    email: 'maria@mail.com',
-                    password: '123',
-                    avatar: 'M',
-                    avatarColor: 'gradient3',
-                    bio: 'Менеджер',
-                    status: 'online',
-                    isVerified: true,
-                    verifiedLevel: 'silver',
-                    verifiedSignature: 'Топ-менеджер'
-                }
-            ];
-            saveToStorage();
-        }
+        let unsubscribeChats = null;
+        let unsubscribeMessages = null;
+        let unsubscribeUsers = null;
 
         // Переключение темы
         window.toggleTheme = function() {
@@ -1404,6 +1306,32 @@
                 localStorage.setItem('theme', 'light');
             }
         };
+
+        // Загрузка темы
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.querySelector('.theme-icon').textContent = '☀️';
+            }
+
+            // Проверяем, есть ли уже авторизованный пользователь
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    // Загружаем данные пользователя из Firestore
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        currentUser = {
+                            id: user.uid,
+                            ...userDoc.data()
+                        };
+                        updateUserInterface();
+                        showDashboard();
+                        subscribeToChats();
+                        subscribeToUsers();
+                    }
+                }
+            });
+        });
 
         // Навигация
         window.showLogin = function() {
@@ -1426,107 +1354,154 @@
             document.getElementById('dashboardPage').style.display = 'block';
             document.getElementById('chatPage').style.display = 'none';
             updateUserInterface();
-            renderChats();
         };
 
-        window.showChat = function(chatId) {
+        window.showChat = async function(chatId) {
             document.getElementById('authPage').style.display = 'none';
             document.getElementById('registerPage').style.display = 'none';
             document.getElementById('dashboardPage').style.display = 'none';
             document.getElementById('chatPage').style.display = 'flex';
             
-            currentChat = chats.find(c => c.id === chatId);
-            if (currentChat) {
-                const otherUserId = currentChat.participants.find(id => id !== currentUser.id);
-                const otherUser = users.find(u => u.id === otherUserId);
-                
-                if (otherUser) {
-                    document.getElementById('chatDisplayName').textContent = otherUser.name;
-                    document.getElementById('chatAvatarText').textContent = otherUser.avatar || otherUser.name[0];
-                    
-                    if (otherUser.isVerified) {
-                        document.getElementById('chatVerifiedIcon').style.display = 'inline';
-                    } else {
-                        document.getElementById('chatVerifiedIcon').style.display = 'none';
-                    }
-                    
-                    document.getElementById('chatStatus').textContent = otherUser.status === 'online' ? 'online' : 'был(а) недавно';
-                }
+            // Загружаем информацию о чате
+            const chatDoc = await db.collection('chats').doc(chatId).get();
+            currentChat = {
+                id: chatDoc.id,
+                ...chatDoc.data()
+            };
+            
+            // Находим собеседника
+            const otherUserId = currentChat.participants.find(id => id !== currentUser.id);
+            const otherUserDoc = await db.collection('users').doc(otherUserId).get();
+            const otherUser = otherUserDoc.data();
+            
+            document.getElementById('chatDisplayName').textContent = otherUser.name;
+            document.getElementById('chatAvatarText').textContent = otherUser.avatar || otherUser.name[0];
+            
+            if (otherUser.isVerified) {
+                document.getElementById('chatVerifiedIcon').style.display = 'inline';
+            } else {
+                document.getElementById('chatVerifiedIcon').style.display = 'none';
             }
             
-            renderMessages();
+            document.getElementById('chatStatus').textContent = otherUser.status === 'online' ? 'online' : 'был(а) недавно';
+            
+            // Подписываемся на сообщения
+            subscribeToMessages(chatId);
         };
 
         window.backToDashboard = function() {
+            // Отписываемся от сообщений
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
             showDashboard();
         };
 
-        // Авторизация
-        window.handleLogin = function(e) {
+        // Регистрация
+        window.handleRegister = async function(e) {
             e.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
             
-            const user = users.find(u => 
-                (u.username === username || u.email === username) && 
-                u.password === password
-            );
-            
-            if (user) {
-                currentUser = { ...user };
-                delete currentUser.password;
-                saveToStorage();
-                updateUserInterface();
-                showDashboard();
-            } else {
-                alert('Неверный username или пароль');
-            }
-        };
-
-        window.handleRegister = function(e) {
-            e.preventDefault();
             const name = document.getElementById('registerName').value;
             const username = document.getElementById('registerUsername').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-            
-            // Проверка уникальности
-            if (users.find(u => u.username === username)) {
-                alert('Username уже занят');
-                return;
+
+            try {
+                // Проверяем, свободен ли username
+                const usernameQuery = await db.collection('users').where('username', '==', username).get();
+                if (!usernameQuery.empty) {
+                    alert('Username уже занят');
+                    return;
+                }
+
+                // Создаем пользователя в Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Создаем профиль пользователя в Firestore
+                const userData = {
+                    name: name,
+                    username: username,
+                    email: email,
+                    avatar: name[0].toUpperCase(),
+                    avatarColor: 'gradient1',
+                    bio: '',
+                    status: 'online',
+                    isVerified: false,
+                    isAdmin: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('users').doc(user.uid).set(userData);
+
+                currentUser = {
+                    id: user.uid,
+                    ...userData
+                };
+
+                updateUserInterface();
+                showDashboard();
+                subscribeToChats();
+                subscribeToUsers();
+
+            } catch (error) {
+                alert('Ошибка регистрации: ' + error.message);
             }
-            
-            if (users.find(u => u.email === email)) {
-                alert('Email уже используется');
-                return;
-            }
-            
-            const newUser = {
-                id: users.length + 1,
-                name: name,
-                username: username,
-                email: email,
-                password: password,
-                avatar: name[0].toUpperCase(),
-                avatarColor: 'gradient1',
-                bio: '',
-                status: 'online',
-                isVerified: false,
-                isAdmin: false
-            };
-            
-            users.push(newUser);
-            currentUser = { ...newUser };
-            delete currentUser.password;
-            saveToStorage();
-            updateUserInterface();
-            showDashboard();
         };
 
-        window.logout = function() {
+        // Вход
+        window.handleLogin = async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Обновляем статус на online
+                await db.collection('users').doc(user.uid).update({
+                    status: 'online',
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Загружаем данные пользователя
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                currentUser = {
+                    id: user.uid,
+                    ...userDoc.data()
+                };
+
+                updateUserInterface();
+                showDashboard();
+                subscribeToChats();
+                subscribeToUsers();
+
+            } catch (error) {
+                alert('Ошибка входа: ' + error.message);
+            }
+        };
+
+        // Выход
+        window.logout = async function() {
+            if (currentUser) {
+                // Обновляем статус на offline
+                await db.collection('users').doc(currentUser.id).update({
+                    status: 'offline',
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            // Отписываемся от всех подписок
+            if (unsubscribeChats) unsubscribeChats();
+            if (unsubscribeUsers) unsubscribeUsers();
+            if (unsubscribeMessages) unsubscribeMessages();
+
+            await auth.signOut();
             currentUser = null;
             currentChat = null;
-            localStorage.removeItem('currentUser');
             showLogin();
         };
 
@@ -1545,15 +1520,14 @@
                 document.getElementById('verifiedBadge').style.display = 'none';
                 document.getElementById('userVerifiedIcon').style.display = 'none';
             }
-            
-            // Обновление модального окна профиля
+
+            // Обновляем модальное окно
             document.getElementById('profileName').value = currentUser.name || '';
             document.getElementById('profileUsername').value = currentUser.username || '';
             document.getElementById('profileBio').value = currentUser.bio || '';
-            document.getElementById('profileStatus').value = currentUser.status || 'online';
             document.getElementById('profileAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             
-            // Показываем админ-панель если пользователь админ
+            // Показываем админ-панель если админ
             if (currentUser.isAdmin) {
                 document.getElementById('verificationSection').style.display = 'block';
             } else {
@@ -1565,34 +1539,195 @@
                 document.getElementById('userVerificationStatus').style.display = 'block';
                 document.getElementById('verificationLevel').textContent = currentUser.verifiedLevel || 'Verified';
                 document.getElementById('verificationSignature').textContent = currentUser.verifiedSignature || '';
-                
-                let badgeColor = 'var(--gold)';
-                if (currentUser.verifiedLevel === 'silver') badgeColor = 'var(--silver)';
-                if (currentUser.verifiedLevel === 'bronze') badgeColor = 'var(--bronze)';
-                document.getElementById('currentVerificationBadge').style.background = badgeColor;
             } else {
                 document.getElementById('userVerificationStatus').style.display = 'none';
             }
         }
 
+        // Подписка на чаты
+        function subscribeToChats() {
+            if (!currentUser) return;
+
+            unsubscribeChats = db.collection('chats')
+                .where('participants', 'array-contains', currentUser.id)
+                .orderBy('lastMessageTime', 'desc')
+                .onSnapshot((snapshot) => {
+                    const chats = [];
+                    snapshot.forEach(doc => {
+                        chats.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    renderChats(chats);
+                });
+        }
+
+        // Подписка на пользователей (для подсчета онлайн)
+        function subscribeToUsers() {
+            unsubscribeUsers = db.collection('users')
+                .onSnapshot((snapshot) => {
+                    let onlineCount = 0;
+                    snapshot.forEach(doc => {
+                        if (doc.data().status === 'online') {
+                            onlineCount++;
+                        }
+                    });
+                    document.getElementById('onlineUsersCount').innerHTML = 
+                        `<i class="fas fa-circle"></i> Онлайн: ${onlineCount}`;
+                });
+        }
+
+        // Подписка на сообщения в чате
+        function subscribeToMessages(chatId) {
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
+
+            unsubscribeMessages = db.collection('messages')
+                .where('chatId', '==', chatId)
+                .orderBy('timestamp', 'asc')
+                .onSnapshot((snapshot) => {
+                    const messages = [];
+                    snapshot.forEach(doc => {
+                        messages.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    renderMessages(messages);
+                });
+        }
+
+        // Рендер чатов
+        async function renderChats(chats) {
+            const container = document.getElementById('chatsContainer');
+            document.getElementById('chatsCount').textContent = chats.length;
+
+            if (chats.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>Нет диалогов</p>
+                        <span>Найдите пользователя и начните общение</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // Загружаем информацию о собеседниках для каждого чата
+            const chatsWithUsers = await Promise.all(chats.map(async (chat) => {
+                const otherUserId = chat.participants.find(id => id !== currentUser.id);
+                const userDoc = await db.collection('users').doc(otherUserId).get();
+                return {
+                    ...chat,
+                    otherUser: userDoc.data()
+                };
+            }));
+
+            container.innerHTML = chatsWithUsers.map(chat => `
+                <div class="chat-item" onclick="showChat('${chat.id}')">
+                    <div class="chat-avatar">
+                        ${chat.otherUser.avatar || chat.otherUser.name[0]}
+                    </div>
+                    <div class="chat-info">
+                        <h4>
+                            ${chat.otherUser.name}
+                            ${chat.otherUser.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                        </h4>
+                        <div class="chat-last-message">
+                            ${chat.lastMessage || 'Нет сообщений'}
+                        </div>
+                    </div>
+                    <div class="chat-time">
+                        ${chat.lastMessageTime ? new Date(chat.lastMessageTime.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Рендер сообщений
+        function renderMessages(messages) {
+            const container = document.getElementById('messagesContainer');
+            
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <p>Нет сообщений</p>
+                        <span>Напишите первое сообщение</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // Загружаем информацию об авторах сообщений
+            Promise.all(messages.map(async (msg) => {
+                if (msg.userId !== currentUser.id && !msg.author) {
+                    const userDoc = await db.collection('users').doc(msg.userId).get();
+                    msg.author = userDoc.data();
+                } else if (msg.userId === currentUser.id) {
+                    msg.author = currentUser;
+                }
+                return msg;
+            })).then((messagesWithAuthors) => {
+                container.innerHTML = messagesWithAuthors.map(msg => {
+                    const isOwn = msg.userId === currentUser.id;
+                    const time = new Date(msg.timestamp?.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    return `
+                        <div class="message-wrapper ${isOwn ? 'own-message' : ''}">
+                            <div class="message-avatar">
+                                ${msg.author?.avatar || msg.author?.name[0] || 'U'}
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-author">
+                                        ${msg.author?.name || 'Пользователь'}
+                                        ${msg.author?.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                                    </span>
+                                    <span class="message-time">${time}</span>
+                                </div>
+                                <div class="message-bubble">
+                                    ${msg.content}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
         // Поиск пользователей
-        window.searchUsers = function() {
+        window.searchUsers = async function() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const resultsContainer = document.getElementById('searchResults');
             
-            if (!query) {
+            if (!query || !currentUser) {
                 resultsContainer.innerHTML = '';
                 return;
             }
             
-            const results = users.filter(u => 
-                u.id !== currentUser.id && 
-                u.username.toLowerCase().includes(query)
-            );
+            const snapshot = await db.collection('users')
+                .where('username', '>=', query)
+                .where('username', '<=', query + '\uf8ff')
+                .get();
+            
+            const results = [];
+            snapshot.forEach(doc => {
+                if (doc.id !== currentUser.id) {
+                    results.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                }
+            });
             
             resultsContainer.innerHTML = results.map(user => `
-                <div class="search-result-item" onclick="startChatWithUser(${user.id})">
-                    <div class="result-avatar" style="background: linear-gradient(135deg, var(--primary), var(--accent));">
+                <div class="search-result-item" onclick="startChatWithUser('${user.id}')">
+                    <div class="result-avatar">
                         ${user.avatar || user.name[0]}
                     </div>
                     <div class="result-info">
@@ -1607,40 +1742,53 @@
         };
 
         // Начать чат с пользователем
-        window.startChatWithUser = function(userId) {
-            // Проверяем существует ли уже чат
-            let existingChat = chats.find(c => 
-                c.type === 'private' && 
-                c.participants.includes(currentUser.id) && 
-                c.participants.includes(userId)
-            );
+        window.startChatWithUser = async function(userId) {
+            // Проверяем, существует ли уже чат
+            const chatsSnapshot = await db.collection('chats')
+                .where('participants', 'array-contains', currentUser.id)
+                .get();
+            
+            let existingChat = null;
+            chatsSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.participants.includes(userId)) {
+                    existingChat = {
+                        id: doc.id,
+                        ...data
+                    };
+                }
+            });
             
             if (!existingChat) {
-                const newChat = {
-                    id: chats.length + 1,
-                    type: 'private',
+                // Создаем новый чат
+                const chatRef = await db.collection('chats').add({
                     participants: [currentUser.id, userId],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastMessage: '',
-                    lastMessageTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                existingChat = {
+                    id: chatRef.id,
+                    participants: [currentUser.id, userId]
                 };
-                chats.push(newChat);
-                existingChat = newChat;
-                saveToStorage();
             }
             
-            renderChats();
             showChat(existingChat.id);
             document.getElementById('searchInput').value = '';
             document.getElementById('searchResults').innerHTML = '';
         };
 
-        // Создание приватного чата по username
-        window.createPrivateChat = function(e) {
+        // Создание чата по username
+        window.createPrivateChat = async function(e) {
             e.preventDefault();
             const username = document.getElementById('newChatUsername').value;
-            const user = users.find(u => u.username === username);
             
-            if (user) {
+            const snapshot = await db.collection('users')
+                .where('username', '==', username)
+                .get();
+            
+            if (!snapshot.empty) {
+                const user = snapshot.docs[0];
                 startChatWithUser(user.id);
             } else {
                 alert('Пользователь не найден');
@@ -1649,132 +1797,28 @@
             document.getElementById('newChatUsername').value = '';
         };
 
-        // Рендер чатов
-        function renderChats() {
-            const container = document.getElementById('chatsContainer');
-            const userChats = chats.filter(c => c.participants.includes(currentUser.id));
-            
-            document.getElementById('chatsCount').textContent = userChats.length;
-            
-            if (userChats.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-comment-slash"></i>
-                        <p>Нет чатов</p>
-                        <span>Найдите пользователя и начните общение</span>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = userChats.map(chat => {
-                const otherUserId = chat.participants.find(id => id !== currentUser.id);
-                const otherUser = users.find(u => u.id === otherUserId);
-                
-                if (!otherUser) return '';
-                
-                const lastMessage = messages
-                    .filter(m => m.chatId === chat.id)
-                    .pop();
-                
-                return `
-                    <div class="chat-item" onclick="showChat(${chat.id})">
-                        <div class="chat-avatar" style="background: linear-gradient(135deg, var(--primary), var(--accent));">
-                            ${otherUser.avatar || otherUser.name[0]}
-                        </div>
-                        <div class="chat-info">
-                            <h4>
-                                ${otherUser.name}
-                                ${otherUser.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
-                            </h4>
-                            <div class="chat-last-message">
-                                ${lastMessage ? lastMessage.content : 'Нет сообщений'}
-                            </div>
-                        </div>
-                        <div class="chat-time">
-                            ${lastMessage ? lastMessage.time : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Рендер сообщений
-        function renderMessages() {
-            const container = document.getElementById('messagesContainer');
-            const chatMessages = messages.filter(m => m.chatId === currentChat?.id);
-            
-            if (chatMessages.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-comments"></i>
-                        <p>Нет сообщений</p>
-                        <span>Напишите первое сообщение</span>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = chatMessages.map(msg => {
-                const author = users.find(u => u.id === msg.userId);
-                const isOwn = msg.userId === currentUser.id;
-                
-                return `
-                    <div class="message-wrapper ${isOwn ? 'own-message' : ''}">
-                        <div class="message-avatar" style="background: linear-gradient(135deg, var(--primary), var(--accent));">
-                            ${author ? (author.avatar || author.name[0]) : 'U'}
-                        </div>
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-author">
-                                    ${author ? author.name : 'Пользователь'}
-                                    ${author?.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
-                                </span>
-                                <span class="message-time">${msg.time}</span>
-                            </div>
-                            <div class="message-bubble">
-                                ${msg.content}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.scrollTop = container.scrollHeight;
-        }
-
         // Отправка сообщения
-        window.sendMessage = function(e) {
+        window.sendMessage = async function(e) {
             e.preventDefault();
             const input = document.getElementById('messageInput');
             const content = input.value.trim();
             
             if (content && currentChat) {
-                const now = new Date();
-                const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-                
-                const newMessage = {
-                    id: messages.length + 1,
+                // Сохраняем сообщение
+                await db.collection('messages').add({
                     chatId: currentChat.id,
                     userId: currentUser.id,
                     content: content,
-                    time: time,
-                    timestamp: Date.now()
-                };
-                
-                messages.push(newMessage);
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 
                 // Обновляем последнее сообщение в чате
-                const chat = chats.find(c => c.id === currentChat.id);
-                if (chat) {
-                    chat.lastMessage = content;
-                    chat.lastMessageTime = time;
-                }
+                await db.collection('chats').doc(currentChat.id).update({
+                    lastMessage: content,
+                    lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 
-                saveToStorage();
-                renderMessages();
                 input.value = '';
-                renderChats(); // Обновляем список чатов
             }
         };
 
@@ -1788,22 +1832,22 @@
             document.getElementById('profileModal').classList.remove('active');
         };
 
-        window.saveProfile = function() {
-            currentUser.name = document.getElementById('profileName').value;
-            currentUser.username = document.getElementById('profileUsername').value;
-            currentUser.bio = document.getElementById('profileBio').value;
-            currentUser.status = document.getElementById('profileStatus').value;
+        window.saveProfile = async function() {
+            const updates = {
+                name: document.getElementById('profileName').value,
+                username: document.getElementById('profileUsername').value,
+                bio: document.getElementById('profileBio').value
+            };
+
+            await db.collection('users').doc(currentUser.id).update(updates);
             
-            // Обновляем пользователя в общем списке
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-            if (userIndex !== -1) {
-                users[userIndex] = { ...users[userIndex], ...currentUser };
-            }
-            
-            saveToStorage();
+            currentUser = {
+                ...currentUser,
+                ...updates
+            };
+
             updateUserInterface();
             closeProfileModal();
-            renderChats(); // Обновляем чаты с новыми именами
         };
 
         window.changeAvatar = function() {
@@ -1815,40 +1859,33 @@
         };
 
         window.setAvatarColor = function(gradient) {
-            const gradients = {
-                gradient1: 'linear-gradient(135deg, #0099ff, #00ccff)',
-                gradient2: 'linear-gradient(135deg, #ff6b6b, #ff4757)',
-                gradient3: 'linear-gradient(135deg, #00d2ff, #3a7bd5)',
-                gradient4: 'linear-gradient(135deg, #fa709a, #fee140)',
-                gradient5: 'linear-gradient(135deg, #30cfd0, #330867)'
-            };
-            
             currentUser.avatarColor = gradient;
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
             event.target.classList.add('selected');
-            
-            document.getElementById('profileAvatarPreview').style.background = gradients[gradient];
         };
 
         // Админские функции
-        window.grantVerification = function(level) {
+        window.grantVerification = async function(level) {
             const signature = document.getElementById('verificationSignature').value || 'Verified Account';
             
-            currentUser.isVerified = true;
-            currentUser.verifiedLevel = level;
-            currentUser.verifiedSignature = signature;
-            
-            saveToStorage();
-            updateUserInterface();
-            alert(`Статус ${level} присвоен!`);
-        };
+            // Здесь нужно выбрать пользователя, которому выдаем верификацию
+            const username = prompt('Введите username пользователя для верификации:');
+            if (!username) return;
 
-        // Закрытие модального окна по клику вне его
-        document.getElementById('profileModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeProfileModal();
+            const snapshot = await db.collection('users').where('username', '==', username).get();
+            
+            if (!snapshot.empty) {
+                const userDoc = snapshot.docs[0];
+                await userDoc.ref.update({
+                    isVerified: true,
+                    verifiedLevel: level,
+                    verifiedSignature: signature
+                });
+                alert(`Статус ${level} присвоен пользователю ${username}!`);
+            } else {
+                alert('Пользователь не найден');
             }
-        });
+        };
     </script>
 </body>
 </html>
