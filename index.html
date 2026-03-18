@@ -65,7 +65,6 @@
             color: var(--text-dark);
         }
 
-        /* Переключатель темы */
         .theme-control {
             position: fixed;
             top: 20px;
@@ -106,7 +105,6 @@
             padding: 20px;
         }
 
-        /* Страницы авторизации */
         .auth-container {
             width: 100%;
             max-width: 440px;
@@ -244,7 +242,6 @@
             text-decoration: underline;
         }
 
-        /* Дашборд */
         .dashboard-container {
             width: 100%;
             max-width: 1400px;
@@ -359,7 +356,6 @@
 
         .status i {
             font-size: 0.5rem;
-            color: var(--success);
         }
 
         .status.online i { color: var(--success); }
@@ -393,7 +389,6 @@
             gap: 30px;
         }
 
-        /* Левая панель */
         .left-panel {
             background: var(--surface-light);
             border-radius: var(--border-radius);
@@ -537,7 +532,6 @@
             font-size: 0.6rem;
         }
 
-        /* Правая панель */
         .right-panel {
             background: var(--surface-light);
             border-radius: var(--border-radius);
@@ -636,7 +630,6 @@
             color: var(--text-secondary-light);
         }
 
-        /* Страница чата */
         .chat-container {
             width: 100%;
             max-width: 1000px;
@@ -686,6 +679,7 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            cursor: pointer;
         }
 
         .chat-header-avatar {
@@ -711,8 +705,11 @@
 
         .chat-header-status {
             font-size: 0.9rem;
-            color: var(--success);
         }
+
+        .chat-header-status.online { color: var(--success); }
+        .chat-header-status.away { color: var(--warning); }
+        .chat-header-status.offline { color: var(--text-secondary-light); }
 
         .messages-container {
             flex: 1;
@@ -882,7 +879,6 @@
             box-shadow: 0 0 30px var(--primary);
         }
 
-        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -1199,7 +1195,6 @@
             color: var(--text-dark);
         }
 
-        /* Адаптивность */
         @media (max-width: 1024px) {
             .dashboard-content {
                 grid-template-columns: 280px 1fr;
@@ -1291,7 +1286,6 @@
             }
         }
 
-        /* Скроллбар */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -1496,7 +1490,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно профиля (свой) -->
+    <!-- Модальное окно своего профиля -->
     <div class="modal" id="profileModal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeProfileModal()">
@@ -1569,25 +1563,25 @@
                 <h4><i class="fas fa-crown"></i> Админ-панель</h4>
                 
                 <div class="admin-actions">
-                    <button class="admin-btn gold" onclick="grantVerification('gold')">
+                    <button class="admin-btn gold" onclick="selectVerificationLevel('gold')">
                         <i class="fas fa-crown"></i> Gold
                     </button>
-                    <button class="admin-btn silver" onclick="grantVerification('silver')">
+                    <button class="admin-btn silver" onclick="selectVerificationLevel('silver')">
                         <i class="fas fa-star"></i> Silver
                     </button>
-                    <button class="admin-btn bronze" onclick="grantVerification('bronze')">
+                    <button class="admin-btn bronze" onclick="selectVerificationLevel('bronze')">
                         <i class="fas fa-medal"></i> Bronze
                     </button>
                 </div>
 
                 <div class="input-group">
-                    <label>Подпись верификации</label>
-                    <input type="text" id="verificationSignature" placeholder="Например: Официальный аккаунт">
+                    <label>Username пользователя</label>
+                    <input type="text" id="verifyUsername" placeholder="@username">
                 </div>
 
                 <div class="input-group">
-                    <label>Username пользователя</label>
-                    <input type="text" id="verifyUsername" placeholder="@username">
+                    <label>Подпись верификации</label>
+                    <input type="text" id="verificationSignature" placeholder="Например: Официальный аккаунт">
                 </div>
 
                 <button class="btn-primary" onclick="verifyUser()" style="background: var(--gold); color: black;">
@@ -1669,16 +1663,18 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Настройки Firestore
+        // Настройки Firestore для автономной работы
         db.settings({
             cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-            ignoreUndefinedProperties: true
+            ignoreUndefinedProperties: true,
+            merge: true
         });
 
         // Состояние приложения
         let currentUser = null;
         let currentChat = null;
         let selectedUser = null;
+        let selectedVerificationLevel = 'gold';
         let unsubscribeChats = null;
         let unsubscribeMessages = null;
         let unsubscribeUsers = null;
@@ -1711,6 +1707,11 @@
                     await loadUserData(user.uid);
                 }
             });
+
+            // Создаем тестовых пользователей через 2 секунды
+            setTimeout(() => {
+                createTestUsers();
+            }, 2000);
         });
 
         // Загрузка данных пользователя
@@ -1737,10 +1738,10 @@
                 } else {
                     // Если документа нет, создаем
                     const userData = {
-                        name: 'Пользователь',
+                        name: auth.currentUser?.email?.split('@')[0] || 'Пользователь',
                         username: 'user' + Math.random().toString(36).substring(7),
-                        email: auth.currentUser.email,
-                        avatar: 'U',
+                        email: auth.currentUser?.email || '',
+                        avatar: (auth.currentUser?.email?.[0] || 'U').toUpperCase(),
                         avatarColor: 'gradient1',
                         bio: '',
                         status: 'online',
@@ -1787,7 +1788,10 @@
                             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                    } catch (e) {}
+                        console.log('Админ создан');
+                    } catch (e) {
+                        console.log('Админ уже существует');
+                    }
 
                     // Создаем пользователя
                     try {
@@ -1805,7 +1809,10 @@
                             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                             lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                         });
-                    } catch (e) {}
+                        console.log('Пользователь создан');
+                    } catch (e) {
+                        console.log('Пользователь уже существует');
+                    }
                 }
             } catch (error) {
                 console.error('Ошибка создания тестовых пользователей:', error);
@@ -1956,11 +1963,14 @@
 
             } catch (error) {
                 if (error.code === 'auth/user-not-found') {
-                    // Если пользователь не найден, предлагаем создать тестового
                     if (confirm('Пользователь не найден. Создать тестового пользователя?')) {
                         await createTestUsers();
-                        alert('Тестовые пользователи созданы. Используйте admin@golub.ru / admin123 или user@golub.ru / user123');
+                        alert('Тестовые пользователи созданы. Используйте:\nАдмин: admin@golub.ru / admin123\nПользователь: user@golub.ru / user123');
                     }
+                } else if (error.code === 'auth/wrong-password') {
+                    alert('Неверный пароль');
+                } else if (error.code === 'auth/invalid-email') {
+                    alert('Неверный формат email');
                 } else {
                     alert('Ошибка входа: ' + error.message);
                 }
@@ -1970,10 +1980,14 @@
         // Выход
         window.logout = async function() {
             if (currentUser) {
-                await db.collection('users').doc(currentUser.id).update({
-                    status: 'offline',
-                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                try {
+                    await db.collection('users').doc(currentUser.id).update({
+                        status: 'offline',
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Ошибка обновления статуса:', error);
+                }
             }
 
             if (unsubscribeChats) unsubscribeChats();
@@ -2014,14 +2028,6 @@
             document.getElementById('editAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             
             // Цвет аватара
-            const gradients = {
-                gradient1: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-                gradient2: 'linear-gradient(135deg, #ef4444, #f97316)',
-                gradient3: 'linear-gradient(135deg, #10b981, #14b8a6)',
-                gradient4: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
-                gradient5: 'linear-gradient(135deg, #f59e0b, #fbbf24)'
-            };
-            
             document.querySelectorAll('.color-option').forEach(opt => {
                 opt.classList.remove('selected');
                 if (opt.dataset.gradient === currentUser.avatarColor) {
@@ -2082,6 +2088,8 @@
                     });
                     document.getElementById('onlineUsersCount').innerHTML = 
                         `<i class="fas fa-circle"></i> Онлайн: ${onlineCount}`;
+                }, (error) => {
+                    console.error('Ошибка подписки на пользователей:', error);
                 });
         }
 
@@ -2278,6 +2286,7 @@
         // Начать чат с пользователем
         window.startChatWithUser = async function(userId) {
             try {
+                // Проверяем существующий чат
                 const chatsSnapshot = await db.collection('chats')
                     .where('participants', 'array-contains', currentUser.id)
                     .get();
@@ -2294,6 +2303,7 @@
                 });
                 
                 if (!existingChat) {
+                    // Создаем новый чат
                     const chatRef = await db.collection('chats').add({
                         participants: [currentUser.id, userId],
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2312,7 +2322,7 @@
                 closeUserProfileModal();
             } catch (error) {
                 console.error('Ошибка создания чата:', error);
-                alert('Не удалось создать чат');
+                alert('Не удалось создать чат. Проверьте подключение к Firebase.');
             }
         };
 
@@ -2349,6 +2359,7 @@
             if (!content || !currentChat) return;
             
             try {
+                // Сохраняем сообщение
                 await db.collection('messages').add({
                     chatId: currentChat.id,
                     userId: currentUser.id,
@@ -2356,6 +2367,7 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
+                // Обновляем последнее сообщение в чате
                 await db.collection('chats').doc(currentChat.id).update({
                     lastMessage: content,
                     lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
@@ -2364,7 +2376,7 @@
                 input.value = '';
             } catch (error) {
                 console.error('Ошибка отправки:', error);
-                alert('Не удалось отправить сообщение');
+                alert('Не удалось отправить сообщение. Ошибка: ' + error.message);
             }
         };
 
@@ -2398,7 +2410,7 @@
             }
             
             // Кнопка верификации для админов
-            if (currentUser.isAdmin) {
+            if (currentUser && currentUser.isAdmin) {
                 document.getElementById('adminVerifyBtn').style.display = 'block';
             } else {
                 document.getElementById('adminVerifyBtn').style.display = 'none';
@@ -2435,7 +2447,17 @@
         window.showAdminVerify = function() {
             closeUserProfileModal();
             openProfileModal();
-            document.getElementById('verifyUsername').value = selectedUser?.username || '';
+            if (selectedUser) {
+                document.getElementById('verifyUsername').value = selectedUser.username;
+            }
+        };
+
+        window.selectVerificationLevel = function(level) {
+            selectedVerificationLevel = level;
+            document.querySelectorAll('.admin-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+            });
+            event.target.style.opacity = '1';
         };
 
         // Сохранение профиля
@@ -2479,14 +2501,8 @@
         };
 
         // Админские функции
-        window.grantVerification = function(level) {
-            document.getElementById('verifyUsername').value = '';
-            // Оставляем для обратной совместимости
-        };
-
         window.verifyUser = async function() {
             const username = document.getElementById('verifyUsername').value;
-            const level = document.querySelector('.admin-actions .admin-btn.gold') ? 'gold' : 'gold'; // По умолчанию gold
             const signature = document.getElementById('verificationSignature').value || 'Verified Account';
 
             if (!username) {
@@ -2501,21 +2517,22 @@
                     const userDoc = snapshot.docs[0];
                     await userDoc.ref.update({
                         isVerified: true,
-                        verifiedLevel: level,
+                        verifiedLevel: selectedVerificationLevel,
                         verifiedSignature: signature
                     });
                     
-                    alert(`Статус ${level} присвоен пользователю ${username}!`);
+                    alert(`Статус ${selectedVerificationLevel} присвоен пользователю ${username}!`);
                     
                     // Если верифицируем текущего пользователя
                     if (userDoc.id === currentUser.id) {
                         currentUser.isVerified = true;
-                        currentUser.verifiedLevel = level;
+                        currentUser.verifiedLevel = selectedVerificationLevel;
                         currentUser.verifiedSignature = signature;
                         updateUserInterface();
                     }
                     
                     document.getElementById('verifyUsername').value = '';
+                    document.getElementById('verificationSignature').value = '';
                 } else {
                     alert('Пользователь не найден');
                 }
