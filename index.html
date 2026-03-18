@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-        /* Все стили остаются такими же как в предыдущей версии */
+        /* Все стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -139,6 +139,14 @@
             font-weight: 800;
         }
 
+        .auth-header p {
+            color: var(--text-secondary-light);
+        }
+
+        .dark-theme .auth-header p {
+            color: var(--text-secondary-dark);
+        }
+
         .auth-form {
             display: flex;
             flex-direction: column;
@@ -155,6 +163,10 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary-light);
+        }
+
+        .dark-theme .form-group i {
+            color: var(--text-secondary-dark);
         }
 
         .form-group input {
@@ -1270,7 +1282,7 @@
     </div>
 
     <script>
-        // 🔥 Конфигурация Firebase (нужно заменить на свои данные)
+        // 🔥 Конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDVzf8T8E7ea5ypds2Aro4XG6OYwnJISDc",
             authDomain: "golub-messenger-77db5.firebaseapp.com",
@@ -1331,7 +1343,59 @@
                     }
                 }
             });
+
+            // Создаем тестовых пользователей если их нет
+            createTestUsers();
         });
+
+        // Создание тестовых пользователей
+        async function createTestUsers() {
+            const usersSnapshot = await db.collection('users').get();
+            
+            if (usersSnapshot.empty) {
+                // Создаем тестового админа
+                try {
+                    const adminCred = await auth.createUserWithEmailAndPassword('admin@golub.ru', 'admin123');
+                    await db.collection('users').doc(adminCred.user.uid).set({
+                        name: 'Админ Голубь',
+                        username: 'admin',
+                        email: 'admin@golub.ru',
+                        avatar: 'A',
+                        avatarColor: 'gradient1',
+                        bio: 'Создатель мессенджера',
+                        status: 'online',
+                        isVerified: true,
+                        verifiedLevel: 'gold',
+                        verifiedSignature: 'Основатель',
+                        isAdmin: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (e) {
+                    console.log('Админ уже существует');
+                }
+
+                // Создаем тестового пользователя
+                try {
+                    const userCred = await auth.createUserWithEmailAndPassword('user@golub.ru', 'user123');
+                    await db.collection('users').doc(userCred.user.uid).set({
+                        name: 'Тестовый Пользователь',
+                        username: 'user',
+                        email: 'user@golub.ru',
+                        avatar: 'U',
+                        avatarColor: 'gradient2',
+                        bio: 'Обычный пользователь',
+                        status: 'online',
+                        isVerified: false,
+                        isAdmin: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (e) {
+                    console.log('Пользователь уже существует');
+                }
+            }
+        }
 
         // Навигация
         window.showLogin = function() {
@@ -1362,31 +1426,44 @@
             document.getElementById('dashboardPage').style.display = 'none';
             document.getElementById('chatPage').style.display = 'flex';
             
-            // Загружаем информацию о чате
-            const chatDoc = await db.collection('chats').doc(chatId).get();
-            currentChat = {
-                id: chatDoc.id,
-                ...chatDoc.data()
-            };
-            
-            // Находим собеседника
-            const otherUserId = currentChat.participants.find(id => id !== currentUser.id);
-            const otherUserDoc = await db.collection('users').doc(otherUserId).get();
-            const otherUser = otherUserDoc.data();
-            
-            document.getElementById('chatDisplayName').textContent = otherUser.name;
-            document.getElementById('chatAvatarText').textContent = otherUser.avatar || otherUser.name[0];
-            
-            if (otherUser.isVerified) {
-                document.getElementById('chatVerifiedIcon').style.display = 'inline';
-            } else {
-                document.getElementById('chatVerifiedIcon').style.display = 'none';
+            try {
+                // Загружаем информацию о чате
+                const chatDoc = await db.collection('chats').doc(chatId).get();
+                if (!chatDoc.exists) {
+                    alert('Чат не найден');
+                    backToDashboard();
+                    return;
+                }
+                
+                currentChat = {
+                    id: chatDoc.id,
+                    ...chatDoc.data()
+                };
+                
+                // Находим собеседника
+                const otherUserId = currentChat.participants.find(id => id !== currentUser.id);
+                const otherUserDoc = await db.collection('users').doc(otherUserId).get();
+                
+                if (otherUserDoc.exists) {
+                    const otherUser = otherUserDoc.data();
+                    document.getElementById('chatDisplayName').textContent = otherUser.name;
+                    document.getElementById('chatAvatarText').textContent = otherUser.avatar || otherUser.name[0];
+                    
+                    if (otherUser.isVerified) {
+                        document.getElementById('chatVerifiedIcon').style.display = 'inline';
+                    } else {
+                        document.getElementById('chatVerifiedIcon').style.display = 'none';
+                    }
+                    
+                    document.getElementById('chatStatus').textContent = otherUser.status === 'online' ? 'online' : 'был(а) недавно';
+                }
+                
+                // Подписываемся на сообщения
+                subscribeToMessages(chatId);
+            } catch (error) {
+                console.error('Ошибка загрузки чата:', error);
+                backToDashboard();
             }
-            
-            document.getElementById('chatStatus').textContent = otherUser.status === 'online' ? 'online' : 'был(а) недавно';
-            
-            // Подписываемся на сообщения
-            subscribeToMessages(chatId);
         };
 
         window.backToDashboard = function() {
@@ -1560,6 +1637,8 @@
                         });
                     });
                     renderChats(chats);
+                }, (error) => {
+                    console.error('Ошибка подписки на чаты:', error);
                 });
         }
 
@@ -1596,6 +1675,8 @@
                         });
                     });
                     renderMessages(messages);
+                }, (error) => {
+                    console.error('Ошибка подписки на сообщения:', error);
                 });
         }
 
@@ -1617,23 +1698,30 @@
 
             // Загружаем информацию о собеседниках для каждого чата
             const chatsWithUsers = await Promise.all(chats.map(async (chat) => {
-                const otherUserId = chat.participants.find(id => id !== currentUser.id);
-                const userDoc = await db.collection('users').doc(otherUserId).get();
-                return {
-                    ...chat,
-                    otherUser: userDoc.data()
-                };
+                try {
+                    const otherUserId = chat.participants.find(id => id !== currentUser.id);
+                    const userDoc = await db.collection('users').doc(otherUserId).get();
+                    return {
+                        ...chat,
+                        otherUser: userDoc.data()
+                    };
+                } catch (error) {
+                    return {
+                        ...chat,
+                        otherUser: { name: 'Пользователь', avatar: '?' }
+                    };
+                }
             }));
 
             container.innerHTML = chatsWithUsers.map(chat => `
                 <div class="chat-item" onclick="showChat('${chat.id}')">
                     <div class="chat-avatar">
-                        ${chat.otherUser.avatar || chat.otherUser.name[0]}
+                        ${chat.otherUser?.avatar || chat.otherUser?.name?.[0] || '?'}
                     </div>
                     <div class="chat-info">
                         <h4>
-                            ${chat.otherUser.name}
-                            ${chat.otherUser.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                            ${chat.otherUser?.name || 'Пользователь'}
+                            ${chat.otherUser?.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
                         </h4>
                         <div class="chat-last-message">
                             ${chat.lastMessage || 'Нет сообщений'}
@@ -1664,8 +1752,12 @@
             // Загружаем информацию об авторах сообщений
             Promise.all(messages.map(async (msg) => {
                 if (msg.userId !== currentUser.id && !msg.author) {
-                    const userDoc = await db.collection('users').doc(msg.userId).get();
-                    msg.author = userDoc.data();
+                    try {
+                        const userDoc = await db.collection('users').doc(msg.userId).get();
+                        msg.author = userDoc.data();
+                    } catch (error) {
+                        msg.author = { name: 'Пользователь', avatar: '?' };
+                    }
                 } else if (msg.userId === currentUser.id) {
                     msg.author = currentUser;
                 }
@@ -1673,12 +1765,12 @@
             })).then((messagesWithAuthors) => {
                 container.innerHTML = messagesWithAuthors.map(msg => {
                     const isOwn = msg.userId === currentUser.id;
-                    const time = new Date(msg.timestamp?.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const time = msg.timestamp ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     
                     return `
                         <div class="message-wrapper ${isOwn ? 'own-message' : ''}">
                             <div class="message-avatar">
-                                ${msg.author?.avatar || msg.author?.name[0] || 'U'}
+                                ${msg.author?.avatar || msg.author?.name?.[0] || '?'}
                             </div>
                             <div class="message-content">
                                 <div class="message-header">
@@ -1710,72 +1802,81 @@
                 return;
             }
             
-            const snapshot = await db.collection('users')
-                .where('username', '>=', query)
-                .where('username', '<=', query + '\uf8ff')
-                .get();
-            
-            const results = [];
-            snapshot.forEach(doc => {
-                if (doc.id !== currentUser.id) {
-                    results.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                }
-            });
-            
-            resultsContainer.innerHTML = results.map(user => `
-                <div class="search-result-item" onclick="startChatWithUser('${user.id}')">
-                    <div class="result-avatar">
-                        ${user.avatar || user.name[0]}
-                    </div>
-                    <div class="result-info">
-                        <div class="result-name">
-                            ${user.name}
-                            ${user.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+            try {
+                const snapshot = await db.collection('users')
+                    .where('username', '>=', query)
+                    .where('username', '<=', query + '\uf8ff')
+                    .get();
+                
+                const results = [];
+                snapshot.forEach(doc => {
+                    if (doc.id !== currentUser.id) {
+                        results.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    }
+                });
+                
+                resultsContainer.innerHTML = results.map(user => `
+                    <div class="search-result-item" onclick="startChatWithUser('${user.id}')">
+                        <div class="result-avatar">
+                            ${user.avatar || user.name[0]}
                         </div>
-                        <div class="result-username">@${user.username}</div>
+                        <div class="result-info">
+                            <div class="result-name">
+                                ${user.name}
+                                ${user.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                            </div>
+                            <div class="result-username">@${user.username}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                console.error('Ошибка поиска:', error);
+            }
         };
 
         // Начать чат с пользователем
         window.startChatWithUser = async function(userId) {
-            // Проверяем, существует ли уже чат
-            const chatsSnapshot = await db.collection('chats')
-                .where('participants', 'array-contains', currentUser.id)
-                .get();
-            
-            let existingChat = null;
-            chatsSnapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.participants.includes(userId)) {
+            try {
+                // Проверяем, существует ли уже чат
+                const chatsSnapshot = await db.collection('chats')
+                    .where('participants', 'array-contains', currentUser.id)
+                    .get();
+                
+                let existingChat = null;
+                chatsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.participants && data.participants.includes(userId)) {
+                        existingChat = {
+                            id: doc.id,
+                            ...data
+                        };
+                    }
+                });
+                
+                if (!existingChat) {
+                    // Создаем новый чат
+                    const chatRef = await db.collection('chats').add({
+                        participants: [currentUser.id, userId],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastMessage: '',
+                        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                     existingChat = {
-                        id: doc.id,
-                        ...data
+                        id: chatRef.id,
+                        participants: [currentUser.id, userId]
                     };
                 }
-            });
-            
-            if (!existingChat) {
-                // Создаем новый чат
-                const chatRef = await db.collection('chats').add({
-                    participants: [currentUser.id, userId],
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    lastMessage: '',
-                    lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                existingChat = {
-                    id: chatRef.id,
-                    participants: [currentUser.id, userId]
-                };
+                
+                showChat(existingChat.id);
+                document.getElementById('searchInput').value = '';
+                document.getElementById('searchResults').innerHTML = '';
+            } catch (error) {
+                console.error('Ошибка создания чата:', error);
+                alert('Не удалось создать чат');
             }
-            
-            showChat(existingChat.id);
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').innerHTML = '';
         };
 
         // Создание чата по username
@@ -1783,15 +1884,20 @@
             e.preventDefault();
             const username = document.getElementById('newChatUsername').value;
             
-            const snapshot = await db.collection('users')
-                .where('username', '==', username)
-                .get();
-            
-            if (!snapshot.empty) {
-                const user = snapshot.docs[0];
-                startChatWithUser(user.id);
-            } else {
-                alert('Пользователь не найден');
+            try {
+                const snapshot = await db.collection('users')
+                    .where('username', '==', username)
+                    .get();
+                
+                if (!snapshot.empty) {
+                    const user = snapshot.docs[0];
+                    startChatWithUser(user.id);
+                } else {
+                    alert('Пользователь не найден');
+                }
+            } catch (error) {
+                console.error('Ошибка поиска:', error);
+                alert('Ошибка при поиске пользователя');
             }
             
             document.getElementById('newChatUsername').value = '';
@@ -1803,9 +1909,13 @@
             const input = document.getElementById('messageInput');
             const content = input.value.trim();
             
-            if (content && currentChat) {
+            if (!content || !currentChat) {
+                return;
+            }
+            
+            try {
                 // Сохраняем сообщение
-                await db.collection('messages').add({
+                const messageRef = await db.collection('messages').add({
                     chatId: currentChat.id,
                     userId: currentUser.id,
                     content: content,
@@ -1819,6 +1929,11 @@
                 });
                 
                 input.value = '';
+                
+                console.log('Сообщение отправлено:', messageRef.id);
+            } catch (error) {
+                console.error('Ошибка отправки сообщения:', error);
+                alert('Не удалось отправить сообщение. Проверьте правила Firestore.');
             }
         };
 
@@ -1839,15 +1954,20 @@
                 bio: document.getElementById('profileBio').value
             };
 
-            await db.collection('users').doc(currentUser.id).update(updates);
-            
-            currentUser = {
-                ...currentUser,
-                ...updates
-            };
+            try {
+                await db.collection('users').doc(currentUser.id).update(updates);
+                
+                currentUser = {
+                    ...currentUser,
+                    ...updates
+                };
 
-            updateUserInterface();
-            closeProfileModal();
+                updateUserInterface();
+                closeProfileModal();
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                alert('Не удалось сохранить профиль');
+            }
         };
 
         window.changeAvatar = function() {
@@ -1868,22 +1988,26 @@
         window.grantVerification = async function(level) {
             const signature = document.getElementById('verificationSignature').value || 'Verified Account';
             
-            // Здесь нужно выбрать пользователя, которому выдаем верификацию
             const username = prompt('Введите username пользователя для верификации:');
             if (!username) return;
 
-            const snapshot = await db.collection('users').where('username', '==', username).get();
-            
-            if (!snapshot.empty) {
-                const userDoc = snapshot.docs[0];
-                await userDoc.ref.update({
-                    isVerified: true,
-                    verifiedLevel: level,
-                    verifiedSignature: signature
-                });
-                alert(`Статус ${level} присвоен пользователю ${username}!`);
-            } else {
-                alert('Пользователь не найден');
+            try {
+                const snapshot = await db.collection('users').where('username', '==', username).get();
+                
+                if (!snapshot.empty) {
+                    const userDoc = snapshot.docs[0];
+                    await userDoc.ref.update({
+                        isVerified: true,
+                        verifiedLevel: level,
+                        verifiedSignature: signature
+                    });
+                    alert(`Статус ${level} присвоен пользователю ${username}!`);
+                } else {
+                    alert('Пользователь не найден');
+                }
+            } catch (error) {
+                console.error('Ошибка верификации:', error);
+                alert('Ошибка при выдаче верификации');
             }
         };
     </script>
