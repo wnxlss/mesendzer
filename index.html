@@ -1388,7 +1388,7 @@
         <div id="dashboardPage" class="dashboard-container">
             <header class="dashboard-header">
                 <div class="header-content">
-                    <div class="user-info" onclick="openProfileModal(currentUser)">
+                    <div class="user-info" onclick="openProfileModal()">
                         <div class="avatar" id="userAvatar">
                             <span id="userAvatarText">U</span>
                             <div id="verifiedBadge" class="verified-badge" style="display: none;">
@@ -1456,7 +1456,7 @@
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 
-                <div class="chat-header-info" onclick="openUserProfileModal(currentChat?.otherUser)">
+                <div class="chat-header-info" onclick="openCurrentChatUserProfile()">
                     <div class="chat-header-avatar" id="chatAvatar">
                         <span id="chatAvatarText">U</span>
                     </div>
@@ -1476,7 +1476,7 @@
 
             <div class="typing-indicator" id="typingIndicator" style="display: none;">
                 <span></span><span></span><span></span>
-                <span class="typing-text"></span>
+                <span class="typing-text">печатает...</span>
             </div>
 
             <div class="chat-input-container">
@@ -1498,7 +1498,7 @@
             </button>
 
             <div class="profile-header">
-                <div class="profile-avatar" id="modalProfileAvatar">
+                <div class="profile-avatar" id="modalProfileAvatar" style="background: linear-gradient(135deg, var(--primary), var(--accent));">
                     <span id="modalProfileAvatarText">U</span>
                     <div id="modalVerifiedBadge" class="verified-badge" style="display: none;">
                         <i class="fas fa-check"></i>
@@ -1521,32 +1521,32 @@
                         <span id="editAvatarText">U</span>
                     </div>
                     <div class="avatar-colors" id="avatarColors">
-                        <div class="color-option selected" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);" onclick="setAvatarColor('gradient1')" data-gradient="gradient1"></div>
-                        <div class="color-option" style="background: linear-gradient(135deg, #ef4444, #f97316);" onclick="setAvatarColor('gradient2')" data-gradient="gradient2"></div>
-                        <div class="color-option" style="background: linear-gradient(135deg, #10b981, #14b8a6);" onclick="setAvatarColor('gradient3')" data-gradient="gradient3"></div>
-                        <div class="color-option" style="background: linear-gradient(135deg, #8b5cf6, #d946ef);" onclick="setAvatarColor('gradient4')" data-gradient="gradient4"></div>
-                        <div class="color-option" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);" onclick="setAvatarColor('gradient5')" data-gradient="gradient5"></div>
+                        <div class="color-option selected" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);" onclick="setAvatarColor('gradient1', event)"></div>
+                        <div class="color-option" style="background: linear-gradient(135deg, #ef4444, #f97316);" onclick="setAvatarColor('gradient2', event)"></div>
+                        <div class="color-option" style="background: linear-gradient(135deg, #10b981, #14b8a6);" onclick="setAvatarColor('gradient3', event)"></div>
+                        <div class="color-option" style="background: linear-gradient(135deg, #8b5cf6, #d946ef);" onclick="setAvatarColor('gradient4', event)"></div>
+                        <div class="color-option" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);" onclick="setAvatarColor('gradient5', event)"></div>
                     </div>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group" style="margin-bottom: 15px;">
                     <label>Имя</label>
-                    <input type="text" id="profileName" placeholder="Ваше имя">
+                    <input type="text" id="profileName" placeholder="Ваше имя" style="padding-left: 16px;">
                 </div>
 
-                <div class="input-group">
+                <div class="form-group" style="margin-bottom: 15px;">
                     <label>Username</label>
-                    <input type="text" id="profileUsername" placeholder="@username">
+                    <input type="text" id="profileUsername" placeholder="@username" style="padding-left: 16px;">
                 </div>
 
-                <div class="input-group">
+                <div class="form-group" style="margin-bottom: 15px;">
                     <label>О себе</label>
-                    <textarea id="profileBio" placeholder="Расскажите о себе..." rows="3"></textarea>
+                    <textarea id="profileBio" placeholder="Расскажите о себе..." rows="3" style="padding-left: 16px;"></textarea>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group" style="margin-bottom: 15px;">
                     <label>Статус</label>
-                    <select id="profileStatusSelect">
+                    <select id="profileStatusSelect" style="padding-left: 16px;">
                         <option value="online">Online</option>
                         <option value="away">Отошел</option>
                         <option value="offline">Offline</option>
@@ -1574,14 +1574,14 @@
                     </button>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group">
                     <label>Username пользователя</label>
-                    <input type="text" id="verifyUsername" placeholder="@username">
+                    <input type="text" id="verifyUsername" placeholder="@username" style="padding-left: 16px;">
                 </div>
 
-                <div class="input-group">
+                <div class="form-group">
                     <label>Подпись верификации</label>
-                    <input type="text" id="verificationSignature" placeholder="Например: Официальный аккаунт">
+                    <input type="text" id="verificationSignature" placeholder="Например: Официальный аккаунт" style="padding-left: 16px;">
                 </div>
 
                 <button class="btn-primary" onclick="verifyUser()" style="background: var(--gold); color: black;">
@@ -1663,11 +1663,10 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Настройки Firestore для автономной работы
+        // Настройки Firestore
         db.settings({
             cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-            ignoreUndefinedProperties: true,
-            merge: true
+            ignoreUndefinedProperties: true
         });
 
         // Состояние приложения
@@ -1694,7 +1693,7 @@
             }
         };
 
-        // Загрузка темы
+        // Загрузка темы и проверка авторизации
         document.addEventListener('DOMContentLoaded', function() {
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-theme');
@@ -1705,10 +1704,12 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     await loadUserData(user.uid);
+                } else {
+                    showLogin();
                 }
             });
 
-            // Создаем тестовых пользователей через 2 секунды
+            // Создаем тестовых пользователей
             setTimeout(() => {
                 createTestUsers();
             }, 2000);
@@ -1897,6 +1898,12 @@
             showDashboard();
         };
 
+        window.openCurrentChatUserProfile = function() {
+            if (currentChat && currentChat.otherUser) {
+                openUserProfileModal(currentChat.otherUser);
+            }
+        };
+
         // Регистрация
         window.handleRegister = async function(e) {
             e.preventDefault();
@@ -2009,6 +2016,9 @@
             document.getElementById('userAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             document.getElementById('userStatus').className = `status ${currentUser.status || 'online'}`;
             
+            // Применяем цвет градиента к аватарам
+            applyAvatarColor('userAvatar', currentUser.avatarColor);
+            
             if (currentUser.isVerified) {
                 document.getElementById('verifiedBadge').style.display = 'flex';
                 document.getElementById('userVerifiedIcon').style.display = 'inline';
@@ -2027,10 +2037,15 @@
             document.getElementById('modalProfileAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             document.getElementById('editAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             
-            // Цвет аватара
+            // Применяем цвет к аватарам в модалке
+            applyAvatarColor('modalProfileAvatar', currentUser.avatarColor);
+            applyAvatarColor('editAvatarPreview', currentUser.avatarColor);
+            
+            // Цвет аватара - выбираем соответствующий градиент
             document.querySelectorAll('.color-option').forEach(opt => {
                 opt.classList.remove('selected');
-                if (opt.dataset.gradient === currentUser.avatarColor) {
+                const gradient = opt.getAttribute('onclick').match(/'([^']+)'/)[1];
+                if (gradient === currentUser.avatarColor) {
                     opt.classList.add('selected');
                 }
             });
@@ -2053,6 +2068,22 @@
             } else {
                 document.getElementById('userVerificationStatus').style.display = 'none';
             }
+        }
+
+        // Функция для применения цвета градиента к аватару
+        function applyAvatarColor(elementId, gradientName) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const gradients = {
+                'gradient1': 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                'gradient2': 'linear-gradient(135deg, #ef4444, #f97316)',
+                'gradient3': 'linear-gradient(135deg, #10b981, #14b8a6)',
+                'gradient4': 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+                'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
+            };
+            
+            element.style.background = gradients[gradientName] || gradients['gradient1'];
         }
 
         // Подписка на чаты
@@ -2111,6 +2142,12 @@
                         });
                     });
                     renderMessages(messages);
+                    
+                    // Прокручиваем вниз при новых сообщениях
+                    setTimeout(() => {
+                        const container = document.getElementById('messagesContainer');
+                        container.scrollTop = container.scrollHeight;
+                    }, 100);
                 }, (error) => {
                     console.error('Ошибка подписки на сообщения:', error);
                 });
@@ -2149,14 +2186,22 @@
             }));
 
             container.innerHTML = chatsWithUsers.map(chat => {
-                const otherUser = chat.otherUser || { name: 'Пользователь', avatar: '?', isVerified: false };
+                const otherUser = chat.otherUser || { name: 'Пользователь', avatar: '?', isVerified: false, avatarColor: 'gradient1' };
                 const time = chat.lastMessageTime ? 
                     new Date(chat.lastMessageTime.seconds * 1000).toLocaleTimeString([], 
                     {hour: '2-digit', minute:'2-digit'}) : '';
                 
+                const gradients = {
+                    'gradient1': 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                    'gradient2': 'linear-gradient(135deg, #ef4444, #f97316)',
+                    'gradient3': 'linear-gradient(135deg, #10b981, #14b8a6)',
+                    'gradient4': 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+                    'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
+                };
+                
                 return `
                     <div class="chat-item" onclick="showChat('${chat.id}')">
-                        <div class="chat-avatar">
+                        <div class="chat-avatar" style="background: ${gradients[otherUser.avatarColor] || gradients['gradient1']}">
                             ${otherUser.avatar || otherUser.name[0]}
                         </div>
                         <div class="chat-info">
@@ -2189,28 +2234,39 @@
                 return;
             }
 
+            // Добавляем авторов сообщений
             Promise.all(messages.map(async (msg) => {
                 if (msg.userId !== currentUser.id && !msg.author) {
                     try {
                         const userDoc = await db.collection('users').doc(msg.userId).get();
-                        msg.author = userDoc.exists ? userDoc.data() : { name: 'Пользователь', avatar: '?' };
+                        msg.author = userDoc.exists ? userDoc.data() : { name: 'Пользователь', avatar: '?', avatarColor: 'gradient1' };
                     } catch (error) {
-                        msg.author = { name: 'Пользователь', avatar: '?' };
+                        msg.author = { name: 'Пользователь', avatar: '?', avatarColor: 'gradient1' };
                     }
                 } else if (msg.userId === currentUser.id) {
                     msg.author = currentUser;
                 }
                 return msg;
             })).then((messagesWithAuthors) => {
+                const gradients = {
+                    'gradient1': 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                    'gradient2': 'linear-gradient(135deg, #ef4444, #f97316)',
+                    'gradient3': 'linear-gradient(135deg, #10b981, #14b8a6)',
+                    'gradient4': 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+                    'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
+                };
+                
                 container.innerHTML = messagesWithAuthors.map(msg => {
                     const isOwn = msg.userId === currentUser.id;
                     const time = msg.timestamp ? 
                         new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], 
                         {hour: '2-digit', minute:'2-digit'}) : '';
                     
+                    const avatarColor = msg.author?.avatarColor || 'gradient1';
+                    
                     return `
                         <div class="message-wrapper ${isOwn ? 'own-message' : ''}">
-                            <div class="message-avatar" onclick="openUserProfileModalById('${msg.userId}')">
+                            <div class="message-avatar" style="background: ${gradients[avatarColor]}" onclick="openUserProfileModalById('${msg.userId}')">
                                 ${msg.author?.avatar || msg.author?.name?.[0] || '?'}
                             </div>
                             <div class="message-content">
@@ -2228,8 +2284,6 @@
                         </div>
                     `;
                 }).join('');
-                
-                container.scrollTop = container.scrollHeight;
             });
         }
 
@@ -2264,9 +2318,17 @@
                     return;
                 }
                 
+                const gradients = {
+                    'gradient1': 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                    'gradient2': 'linear-gradient(135deg, #ef4444, #f97316)',
+                    'gradient3': 'linear-gradient(135deg, #10b981, #14b8a6)',
+                    'gradient4': 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+                    'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
+                };
+                
                 resultsContainer.innerHTML = results.map(user => `
                     <div class="search-result-item" onclick="openUserProfileModalById('${user.id}')">
-                        <div class="result-avatar">
+                        <div class="result-avatar" style="background: ${gradients[user.avatarColor] || gradients['gradient1']}">
                             ${user.avatar || user.name[0]}
                         </div>
                         <div class="result-info">
@@ -2302,6 +2364,8 @@
                     }
                 });
                 
+                let chatId;
+                
                 if (!existingChat) {
                     // Создаем новый чат
                     const chatRef = await db.collection('chats').add({
@@ -2310,13 +2374,12 @@
                         lastMessage: '',
                         lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    existingChat = {
-                        id: chatRef.id,
-                        participants: [currentUser.id, userId]
-                    };
+                    chatId = chatRef.id;
+                } else {
+                    chatId = existingChat.id;
                 }
                 
-                showChat(existingChat.id);
+                showChat(chatId);
                 document.getElementById('searchInput').value = '';
                 document.getElementById('searchResults').innerHTML = '';
                 closeUserProfileModal();
@@ -2401,6 +2464,9 @@
             document.getElementById('userProfileChats').textContent = '0';
             document.getElementById('userProfileStatus').textContent = user.status || 'offline';
             
+            // Применяем цвет аватара
+            applyAvatarColor('userProfileAvatar', user.avatarColor);
+            
             if (user.isVerified) {
                 document.getElementById('userProfileVerifiedBadge').style.display = 'flex';
                 document.getElementById('userProfileVerifiedIcon').style.display = 'inline';
@@ -2455,9 +2521,9 @@
         window.selectVerificationLevel = function(level) {
             selectedVerificationLevel = level;
             document.querySelectorAll('.admin-btn').forEach(btn => {
-                btn.style.opacity = '0.5';
+                btn.style.opacity = '1';
             });
-            event.target.style.opacity = '1';
+            event.target.style.opacity = '0.8';
         };
 
         // Сохранение профиля
@@ -2479,6 +2545,7 @@
 
                 updateUserInterface();
                 closeProfileModal();
+                alert('Профиль сохранен!');
             } catch (error) {
                 console.error('Ошибка сохранения:', error);
                 alert('Не удалось сохранить профиль');
@@ -2494,10 +2561,24 @@
             document.getElementById('modalProfileAvatarText').textContent = randomLetter;
         };
 
-        window.setAvatarColor = function(gradient) {
+        window.setAvatarColor = async function(gradient, event) {
             currentUser.avatarColor = gradient;
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
             event.target.classList.add('selected');
+            
+            // Применяем цвет к аватарам
+            applyAvatarColor('modalProfileAvatar', gradient);
+            applyAvatarColor('editAvatarPreview', gradient);
+            applyAvatarColor('userAvatar', gradient);
+            
+            // Сохраняем в Firebase
+            try {
+                await db.collection('users').doc(currentUser.id).update({
+                    avatarColor: gradient
+                });
+            } catch (error) {
+                console.error('Ошибка сохранения цвета:', error);
+            }
         };
 
         // Админские функции
