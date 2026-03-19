@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-        /* Стили такие же как в предыдущих ответах */
         * {
             margin: 0;
             padding: 0;
@@ -46,6 +45,9 @@
             --gold: #fbbf24;
             --silver: #94a3b8;
             --bronze: #b45309;
+            --blue-verified: #3b82f6;
+            --red-verified: #ef4444;
+            --purple-verified: #8b5cf6;
             
             --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             --border-radius: 24px;
@@ -66,11 +68,92 @@
             color: var(--text-dark);
         }
 
+        body.maintenance-mode .auth-container,
+        body.maintenance-mode .dashboard-container,
+        body.maintenance-mode .chat-container {
+            filter: blur(5px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .maintenance-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        body.maintenance-mode .maintenance-overlay {
+            display: flex;
+        }
+
+        .maintenance-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 30px;
+            border: 4px solid var(--primary);
+            object-fit: cover;
+        }
+
+        .maintenance-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .maintenance-text {
+            font-size: 1.2rem;
+            color: var(--text-secondary-dark);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
         .theme-control {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+
+        .settings-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--surface-light);
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+
+        .dark-theme .settings-btn {
+            background: var(--surface-dark);
+            box-shadow: var(--shadow-dark);
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 0 30px var(--primary);
         }
 
         .theme-toggle {
@@ -96,6 +179,16 @@
         .theme-toggle:hover {
             transform: scale(1.1) rotate(15deg);
             box-shadow: 0 0 30px var(--primary);
+        }
+
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: block;
+            border: 3px solid var(--primary);
+            object-fit: cover;
         }
 
         #app {
@@ -204,6 +297,12 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
+        .form-group input:disabled {
+            background: rgba(0,0,0,0.05);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         .btn-primary {
             padding: 16px;
             border: none;
@@ -223,6 +322,23 @@
         .btn-glow:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px var(--primary);
+        }
+
+        .btn-danger {
+            padding: 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--danger);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--danger);
         }
 
         .auth-footer {
@@ -313,14 +429,16 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--gold);
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
             border: 2px solid var(--surface-light);
         }
+
+        .verified-badge.blue { background: var(--blue-verified); color: white; }
+        .verified-badge.red { background: var(--red-verified); color: white; }
+        .verified-badge.purple { background: var(--purple-verified); color: white; }
 
         .dark-theme .verified-badge {
             border-color: var(--surface-dark);
@@ -902,7 +1020,7 @@
             background: var(--surface-light);
             border-radius: var(--border-radius-lg);
             padding: 40px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
@@ -933,6 +1051,48 @@
             background: var(--danger);
             color: white;
             transform: rotate(90deg);
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 10px;
+        }
+
+        .dark-theme .modal-tabs {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .modal-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary-light);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            border-radius: 30px;
+        }
+
+        .modal-tab:hover {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
+        .modal-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .modal-tab-content {
+            display: none;
+        }
+
+        .modal-tab-content.active {
+            display: block;
         }
 
         .profile-header {
@@ -1124,13 +1284,75 @@
             color: white;
         }
 
-        .admin-btn.gold { background: var(--gold); color: black; }
-        .admin-btn.silver { background: var(--silver); color: black; }
-        .admin-btn.bronze { background: var(--bronze); }
+        .admin-btn.blue { background: var(--blue-verified); }
+        .admin-btn.red { background: var(--red-verified); }
+        .admin-btn.purple { background: var(--purple-verified); }
 
         .admin-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.4);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .users-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 20px;
+        }
+
+        .dark-theme .users-list {
+            border-color: var(--border-dark);
+        }
+
+        .user-list-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dark-theme .user-list-item {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .user-list-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .user-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-list-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-list-info {
+            flex: 1;
+        }
+
+        .user-list-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-list-username {
+            font-size: 0.8rem;
+            color: var(--text-secondary-light);
         }
 
         .verification-badge {
@@ -1143,9 +1365,88 @@
             font-weight: 600;
         }
 
-        .verification-badge.gold { background: var(--gold); color: black; }
-        .verification-badge.silver { background: var(--silver); color: black; }
-        .verification-badge.bronze { background: var(--bronze); color: white; }
+        .verification-badge.blue { background: var(--blue-verified); color: white; }
+        .verification-badge.red { background: var(--red-verified); color: white; }
+        .verification-badge.purple { background: var(--purple-verified); color: white; }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .settings-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.05);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 10px;
+        }
+
+        .settings-item-info h4 {
+            margin-bottom: 5px;
+            font-size: 1rem;
+        }
+
+        .settings-item-info p {
+            color: var(--text-secondary-light);
+            font-size: 0.85rem;
+        }
+
+        .settings-item-action {
+            display: flex;
+            gap: 10px;
+        }
+
+        .settings-item-action button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .settings-item-action button:hover {
+            transform: scale(1.05);
+        }
+
+        .admin-code-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-light);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background: transparent;
+            color: inherit;
+            margin-bottom: 15px;
+            text-align: center;
+            letter-spacing: 5px;
+            font-size: 1.5rem;
+        }
+
+        .dark-theme .admin-code-input {
+            border-color: var(--border-dark);
+        }
+
+        .admin-code-input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .admin-panel-hidden {
+            display: none;
+        }
 
         @keyframes fadeInUp {
             from {
@@ -1306,7 +1607,19 @@
     </style>
 </head>
 <body>
+    <div class="maintenance-overlay" id="maintenanceOverlay">
+        <img src="https://i.ibb.co/zhpWMzQD/IMG-1482.jpg" alt="golub logo" class="maintenance-logo">
+        <div class="maintenance-title">golub</div>
+        <div class="maintenance-text">
+            Ведутся технические работы. Приносим извинения за временные неудобства.<br>
+            Пожалуйста, зайдите позже.
+        </div>
+    </div>
+
     <div class="theme-control">
+        <button class="settings-btn" onclick="openSettingsModal()">
+            <i class="fas fa-cog"></i>
+        </button>
         <button class="theme-toggle" onclick="toggleTheme()">
             <span class="theme-icon">🌙</span>
         </button>
@@ -1317,6 +1630,7 @@
         <div id="authPage" class="auth-container">
             <div class="auth-card">
                 <div class="auth-header">
+                    <img src="https://i.ibb.co/zhpWMzQD/IMG-1482.jpg" alt="golub logo" class="auth-logo">
                     <h1 class="gradient-text">golub</h1>
                     <p>Войдите в свой аккаунт</p>
                 </div>
@@ -1348,6 +1662,7 @@
         <div id="registerPage" class="auth-container" style="display: none;">
             <div class="auth-card">
                 <div class="auth-header">
+                    <img src="https://i.ibb.co/zhpWMzQD/IMG-1482.jpg" alt="golub logo" class="auth-logo">
                     <h1 class="gradient-text">Создать аккаунт</h1>
                     <p>Присоединяйтесь к golub</p>
                 </div>
@@ -1392,14 +1707,12 @@
                     <div class="user-info" onclick="openProfileModal()">
                         <div class="avatar" id="userAvatar">
                             <span id="userAvatarText">U</span>
-                            <div id="verifiedBadge" class="verified-badge" style="display: none;">
-                                <i class="fas fa-check"></i>
-                            </div>
+                            <div id="verifiedBadge" class="verified-badge" style="display: none;"></div>
                         </div>
                         <div class="user-details">
                             <div class="user-name">
                                 <h2 id="userDisplayName">Загрузка...</h2>
-                                <span id="userVerifiedIcon" style="display: none; color: var(--gold);">
+                                <span id="userVerifiedIcon" style="display: none;">
                                     <i class="fas fa-check-circle"></i>
                                 </span>
                             </div>
@@ -1420,7 +1733,7 @@
                         <h3><i class="fas fa-search"></i> Поиск</h3>
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="searchInput" placeholder="Введите username..." oninput="searchUsers()">
+                            <input type="text" id="searchInput" placeholder="Введите имя или username..." oninput="searchUsers()">
                         </div>
                         <div class="search-results" id="searchResults"></div>
                     </div>
@@ -1464,7 +1777,7 @@
                     <div class="chat-header-text">
                         <h2 id="currentChatName">
                             <span id="chatDisplayName"></span>
-                            <span id="chatVerifiedIcon" style="display: none; color: var(--gold);">
+                            <span id="chatVerifiedIcon" style="display: none;">
                                 <i class="fas fa-check-circle"></i>
                             </span>
                         </h2>
@@ -1491,6 +1804,158 @@
         </div>
     </div>
 
+    <!-- Модальное окно настроек -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSettingsModal()">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" onclick="switchSettingsTab('main')">Основные</button>
+                <button class="modal-tab" onclick="switchSettingsTab('appearance')">Внешний вид</button>
+                <button class="modal-tab" onclick="switchSettingsTab('privacy')">Приватность</button>
+                <button class="modal-tab" onclick="switchSettingsTab('admin')">Админ</button>
+            </div>
+
+            <!-- Основные настройки -->
+            <div id="settingsMainTab" class="modal-tab-content active">
+                <div class="settings-section">
+                    <h3><i class="fas fa-user"></i> Профиль</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4>Редактировать профиль</h4>
+                            <p>Изменить имя, аватар и информацию о себе</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <button onclick="openProfileModal(); closeSettingsModal();">
+                                <i class="fas fa-edit"></i> Открыть
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-bell"></i> Уведомления</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4>Звук сообщений</h4>
+                            <p>Воспроизводить звук при новых сообщениях</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <label class="switch">
+                                <input type="checkbox" id="soundNotifications" checked onchange="toggleSoundNotifications()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Настройки внешнего вида -->
+            <div id="settingsAppearanceTab" class="modal-tab-content">
+                <div class="settings-section">
+                    <h3><i class="fas fa-palette"></i> Тема</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4>Темная тема</h4>
+                            <p>Переключить между светлой и темной темой</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <button onclick="toggleTheme()">
+                                <i class="fas fa-moon"></i> Переключить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Настройки приватности -->
+            <div id="settingsPrivacyTab" class="modal-tab-content">
+                <div class="settings-section">
+                    <h3><i class="fas fa-globe"></i> Статус</h3>
+                    <div class="settings-item">
+                        <div class="settings-item-info">
+                            <h4>Видимость статуса</h4>
+                            <p>Кто может видеть ваш онлайн-статус</p>
+                        </div>
+                        <div class="settings-item-action">
+                            <select id="privacyStatus" onchange="updatePrivacySettings()">
+                                <option value="all">Все</option>
+                                <option value="contacts">Только контакты</option>
+                                <option value="none">Никто</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Админ-панель -->
+            <div id="settingsAdminTab" class="modal-tab-content">
+                <div class="settings-section">
+                    <h3><i class="fas fa-lock"></i> Доступ к админ-панели</h3>
+                    <input type="password" id="adminCode" class="admin-code-input" placeholder="Введите код доступа" maxlength="8">
+                    <button class="btn-primary" onclick="checkAdminCode()" style="width: 100%;">
+                        <i class="fas fa-key"></i> Войти в админ-панель
+                    </button>
+                </div>
+
+                <div id="adminPanelContent" style="display: none;">
+                    <div class="settings-section">
+                        <h3><i class="fas fa-crown"></i> Управление верификацией</h3>
+                        
+                        <div class="admin-actions">
+                            <button class="admin-btn blue" onclick="selectVerificationLevel('blue')">
+                                <i class="fas fa-check-circle"></i> Синяя
+                            </button>
+                            <button class="admin-btn red" onclick="selectVerificationLevel('red')">
+                                <i class="fas fa-check-circle"></i> Красная
+                            </button>
+                            <button class="admin-btn purple" onclick="selectVerificationLevel('purple')">
+                                <i class="fas fa-check-circle"></i> Фиолетовая
+                            </button>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label>Username пользователя</label>
+                            <input type="text" id="verifyUsername" placeholder="@username" style="padding-left: 16px;">
+                        </div>
+
+                        <button class="btn-primary" onclick="verifyUser()" style="margin-bottom: 30px;">
+                            <i class="fas fa-check-circle"></i> Выдать верификацию
+                        </button>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3><i class="fas fa-ban"></i> Блокировка пользователей</h3>
+                        
+                        <div class="users-list" id="usersList"></div>
+
+                        <button class="btn-danger" onclick="banSelectedUser()" style="width: 100%;">
+                            <i class="fas fa-trash"></i> Удалить выбранного пользователя
+                        </button>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3><i class="fas fa-tools"></i> Режим обслуживания</h3>
+                        
+                        <div class="settings-item">
+                            <div class="settings-item-info">
+                                <h4>Технические работы</h4>
+                                <p>Включить режим техработ для обычных пользователей</p>
+                            </div>
+                            <div class="settings-item-action">
+                                <button onclick="toggleMaintenanceMode()" id="maintenanceBtn">
+                                    <i class="fas fa-power-off"></i> Включить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Модальное окно своего профиля -->
     <div class="modal" id="profileModal">
         <div class="modal-content">
@@ -1501,13 +1966,11 @@
             <div class="profile-header">
                 <div class="profile-avatar" id="modalProfileAvatar" style="background: linear-gradient(135deg, var(--primary), var(--accent));">
                     <span id="modalProfileAvatarText">U</span>
-                    <div id="modalVerifiedBadge" class="verified-badge" style="display: none;">
-                        <i class="fas fa-check"></i>
-                    </div>
+                    <div id="modalVerifiedBadge" class="verified-badge" style="display: none;"></div>
                 </div>
                 <div class="profile-name">
                     <span id="modalProfileName"></span>
-                    <span id="modalVerifiedIcon" style="display: none; color: var(--gold);">
+                    <span id="modalVerifiedIcon" style="display: none;">
                         <i class="fas fa-check-circle"></i>
                     </span>
                 </div>
@@ -1536,8 +1999,8 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <label>Username</label>
-                    <input type="text" id="profileUsername" placeholder="@username" style="padding-left: 16px;">
+                    <label>Username (нельзя изменить)</label>
+                    <input type="text" id="profileUsername" placeholder="@username" style="padding-left: 16px;" disabled>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 15px;">
@@ -1556,31 +2019,6 @@
 
                 <button class="btn-primary" onclick="saveProfile()">
                     <i class="fas fa-save"></i> Сохранить
-                </button>
-            </div>
-
-            <!-- Админ-панель -->
-            <div class="admin-section" id="adminPanel" style="display: none;">
-                <h4><i class="fas fa-crown"></i> Админ-панель</h4>
-                
-                <div class="admin-actions">
-                    <button class="admin-btn gold" onclick="selectVerificationLevel('gold', event)">Gold</button>
-                    <button class="admin-btn silver" onclick="selectVerificationLevel('silver', event)">Silver</button>
-                    <button class="admin-btn bronze" onclick="selectVerificationLevel('bronze', event)">Bronze</button>
-                </div>
-
-                <div class="form-group">
-                    <label>Username пользователя</label>
-                    <input type="text" id="verifyUsername" placeholder="@username" style="padding-left: 16px;">
-                </div>
-
-                <div class="form-group">
-                    <label>Подпись верификации</label>
-                    <input type="text" id="verificationSignature" placeholder="Например: Официальный аккаунт" style="padding-left: 16px;">
-                </div>
-
-                <button class="btn-primary" onclick="verifyUser()" style="background: var(--gold); color: black;">
-                    <i class="fas fa-check-circle"></i> Выдать верификацию
                 </button>
             </div>
 
@@ -1605,13 +2043,11 @@
             <div class="profile-header">
                 <div class="profile-avatar" id="userProfileAvatar">
                     <span id="userProfileAvatarText">U</span>
-                    <div id="userProfileVerifiedBadge" class="verified-badge" style="display: none;">
-                        <i class="fas fa-check"></i>
-                    </div>
+                    <div id="userProfileVerifiedBadge" class="verified-badge" style="display: none;"></div>
                 </div>
                 <div class="profile-name">
                     <span id="userProfileName"></span>
-                    <span id="userProfileVerifiedIcon" style="display: none; color: var(--gold);">
+                    <span id="userProfileVerifiedIcon" style="display: none;">
                         <i class="fas fa-check-circle"></i>
                     </span>
                 </div>
@@ -1634,9 +2070,6 @@
             <div class="profile-actions">
                 <button class="btn-message" onclick="messageUser()">
                     <i class="fas fa-comment"></i> Написать
-                </button>
-                <button class="btn-admin" id="adminVerifyBtn" style="display: none;" onclick="showAdminVerify()">
-                    <i class="fas fa-crown"></i> Верифицировать
                 </button>
             </div>
         </div>
@@ -1668,10 +2101,17 @@
         let currentUser = null;
         let currentChat = null;
         let selectedUser = null;
-        let selectedVerificationLevel = 'gold';
+        let selectedVerificationLevel = 'blue';
         let unsubscribeChats = null;
         let unsubscribeMessages = null;
         let unsubscribeUsers = null;
+        let maintenanceMode = false;
+        let allUsersList = [];
+
+        // Константы
+        const ADMIN_CODE = '29592470';
+        const ADMIN_EMAIL = 'wnxlss@golub.ru';
+        const ADMIN_PASSWORD = 'ser2312ser';
 
         // Переключение темы
         window.toggleTheme = function() {
@@ -1699,17 +2139,224 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     await loadUserData(user.uid);
+                    
+                    // Проверяем, является ли пользователь админом
+                    if (user.email === ADMIN_EMAIL) {
+                        // Если это админский аккаунт, делаем его админом
+                        await db.collection('users').doc(user.uid).update({
+                            isAdmin: true
+                        });
+                    }
                 } else {
                     showLogin();
                 }
             });
 
-            // Создаем тестовых пользователей
+            // Создаем админский аккаунт
             setTimeout(() => {
-                createTestUsers();
+                createAdminAccount();
             }, 2000);
         });
 
+        // Создание админского аккаунта
+        async function createAdminAccount() {
+            try {
+                // Проверяем, существует ли уже админ
+                const adminSnapshot = await db.collection('users').where('email', '==', ADMIN_EMAIL).get();
+                
+                if (adminSnapshot.empty) {
+                    // Создаем админа
+                    try {
+                        const adminCred = await auth.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASSWORD);
+                        await db.collection('users').doc(adminCred.user.uid).set({
+                            name: 'Главный Админ',
+                            username: 'admin',
+                            email: ADMIN_EMAIL,
+                            avatar: 'A',
+                            avatarColor: 'gradient1',
+                            bio: 'Главный администратор мессенджера',
+                            status: 'offline',
+                            isVerified: true,
+                            verifiedLevel: 'blue',
+                            verifiedSignature: 'Главный администратор',
+                            isAdmin: true,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        console.log('Админ создан');
+                    } catch (e) {
+                        console.log('Админ уже существует');
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка создания админа:', error);
+            }
+        }
+
+        // Функции для настроек
+        window.openSettingsModal = function() {
+            document.getElementById('settingsModal').classList.add('active');
+            if (currentUser && currentUser.isAdmin) {
+                loadUsersList();
+            }
+        };
+
+        window.closeSettingsModal = function() {
+            document.getElementById('settingsModal').classList.remove('active');
+        };
+
+        window.switchSettingsTab = function(tab) {
+            document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`settings${tab.charAt(0).toUpperCase() + tab.slice(1)}Tab`).classList.add('active');
+        };
+
+        window.toggleSoundNotifications = function() {
+            // Функция для уведомлений
+            console.log('Sound notifications:', document.getElementById('soundNotifications').checked);
+        };
+
+        window.updatePrivacySettings = function() {
+            // Функция для настроек приватности
+            console.log('Privacy status:', document.getElementById('privacyStatus').value);
+        };
+
+        window.checkAdminCode = function() {
+            const code = document.getElementById('adminCode').value;
+            if (code === ADMIN_CODE) {
+                document.getElementById('adminPanelContent').style.display = 'block';
+                document.getElementById('adminCode').style.display = 'none';
+                loadUsersList();
+            } else {
+                alert('Неверный код доступа');
+            }
+        };
+
+        window.selectVerificationLevel = function(level) {
+            selectedVerificationLevel = level;
+            document.querySelectorAll('.admin-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+            });
+            event.target.style.opacity = '1';
+        };
+
+        // Загрузка списка пользователей для админки
+        async function loadUsersList() {
+            try {
+                const snapshot = await db.collection('users').get();
+                allUsersList = [];
+                snapshot.forEach(doc => {
+                    allUsersList.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                renderUsersList();
+            } catch (error) {
+                console.error('Ошибка загрузки пользователей:', error);
+            }
+        }
+
+        function renderUsersList() {
+            const container = document.getElementById('usersList');
+            if (!container) return;
+
+            const gradients = {
+                'gradient1': 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                'gradient2': 'linear-gradient(135deg, #ef4444, #f97316)',
+                'gradient3': 'linear-gradient(135deg, #10b981, #14b8a6)',
+                'gradient4': 'linear-gradient(135deg, #8b5cf6, #d946ef)',
+                'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
+            };
+
+            container.innerHTML = allUsersList.map(user => `
+                <div class="user-list-item" onclick="selectUserForBan('${user.id}')">
+                    <div class="user-list-avatar" style="background: ${gradients[user.avatarColor] || gradients['gradient1']}">
+                        ${user.avatar || user.name[0]}
+                    </div>
+                    <div class="user-list-info">
+                        <div class="user-list-name">
+                            ${user.name}
+                            ${user.isVerified ? '<i class="fas fa-check-circle" style="color: var(--blue-verified);"></i>' : ''}
+                        </div>
+                        <div class="user-list-username">@${user.username}</div>
+                    </div>
+                    <input type="radio" name="selectedUser" value="${user.id}" style="display: none;">
+                </div>
+            `).join('');
+        }
+
+        window.selectUserForBan = function(userId) {
+            const radio = document.querySelector(`input[value="${userId}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+        };
+
+        window.banSelectedUser = async function() {
+            const selected = document.querySelector('input[name="selectedUser"]:checked');
+            if (!selected) {
+                alert('Выберите пользователя');
+                return;
+            }
+
+            if (!confirm('Вы уверены, что хотите удалить этого пользователя? Это действие необратимо.')) {
+                return;
+            }
+
+            try {
+                const userId = selected.value;
+                
+                // Удаляем пользователя из Auth (это сложно сделать через клиент)
+                // Вместо этого просто удаляем его данные
+                await db.collection('users').doc(userId).delete();
+                
+                // Удаляем все чаты пользователя
+                const chatsSnapshot = await db.collection('chats')
+                    .where('participants', 'array-contains', userId)
+                    .get();
+                
+                chatsSnapshot.forEach(async (doc) => {
+                    await doc.ref.delete();
+                });
+                
+                // Удаляем все сообщения пользователя
+                const messagesSnapshot = await db.collection('messages')
+                    .where('userId', '==', userId)
+                    .get();
+                
+                messagesSnapshot.forEach(async (doc) => {
+                    await doc.ref.delete();
+                });
+                
+                alert('Пользователь удален');
+                loadUsersList();
+                
+            } catch (error) {
+                console.error('Ошибка удаления пользователя:', error);
+                alert('Ошибка при удалении пользователя');
+            }
+        };
+
+        window.toggleMaintenanceMode = function() {
+            maintenanceMode = !maintenanceMode;
+            const btn = document.getElementById('maintenanceBtn');
+            
+            if (maintenanceMode) {
+                document.body.classList.add('maintenance-mode');
+                btn.innerHTML = '<i class="fas fa-power-off"></i> Выключить';
+                btn.style.background = 'var(--danger)';
+            } else {
+                document.body.classList.remove('maintenance-mode');
+                btn.innerHTML = '<i class="fas fa-power-off"></i> Включить';
+                btn.style.background = '';
+            }
+        };
+
+        // Остальные функции из вашего кода (они остаются без изменений)
         // Загрузка данных пользователя
         async function loadUserData(userId) {
             try {
@@ -1731,6 +2378,11 @@
                     showDashboard();
                     subscribeToChats();
                     subscribeToUsers();
+
+                    // Проверяем режим обслуживания
+                    if (maintenanceMode && !currentUser.isAdmin) {
+                        document.body.classList.add('maintenance-mode');
+                    }
                 } else {
                     // Если документа нет, создаем
                     const userData = {
@@ -1742,7 +2394,7 @@
                         bio: '',
                         status: 'online',
                         isVerified: false,
-                        isAdmin: false,
+                        isAdmin: auth.currentUser?.email === ADMIN_EMAIL,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                     };
@@ -1756,62 +2408,6 @@
                 }
             } catch (error) {
                 console.error('Ошибка загрузки пользователя:', error);
-            }
-        }
-
-        // Создание тестовых пользователей
-        async function createTestUsers() {
-            try {
-                // Проверяем, есть ли уже пользователи
-                const usersSnapshot = await db.collection('users').get();
-                
-                if (usersSnapshot.size < 2) {
-                    // Создаем админа
-                    try {
-                        const adminCred = await auth.createUserWithEmailAndPassword('admin@golub.ru', 'admin123');
-                        await db.collection('users').doc(adminCred.user.uid).set({
-                            name: 'Админ Голубь',
-                            username: 'admin',
-                            email: 'admin@golub.ru',
-                            avatar: 'A',
-                            avatarColor: 'gradient1',
-                            bio: 'Создатель мессенджера',
-                            status: 'offline',
-                            isVerified: true,
-                            verifiedLevel: 'gold',
-                            verifiedSignature: 'Основатель',
-                            isAdmin: true,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        console.log('Админ создан');
-                    } catch (e) {
-                        console.log('Админ уже существует');
-                    }
-
-                    // Создаем пользователя
-                    try {
-                        const userCred = await auth.createUserWithEmailAndPassword('user@golub.ru', 'user123');
-                        await db.collection('users').doc(userCred.user.uid).set({
-                            name: 'Тестовый Пользователь',
-                            username: 'user',
-                            email: 'user@golub.ru',
-                            avatar: 'U',
-                            avatarColor: 'gradient2',
-                            bio: 'Обычный пользователь',
-                            status: 'offline',
-                            isVerified: false,
-                            isAdmin: false,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        console.log('Пользователь создан');
-                    } catch (e) {
-                        console.log('Пользователь уже существует');
-                    }
-                }
-            } catch (error) {
-                console.error('Ошибка создания тестовых пользователей:', error);
             }
         }
 
@@ -1844,8 +2440,6 @@
             document.getElementById('chatPage').style.display = 'flex';
             
             try {
-                console.log('Загружаем чат с ID:', chatId);
-                
                 const chatDoc = await db.collection('chats').doc(chatId).get();
                 if (!chatDoc.exists) {
                     alert('Чат не найден');
@@ -1857,8 +2451,6 @@
                     id: chatDoc.id,
                     ...chatDoc.data()
                 };
-                
-                console.log('Чат загружен:', currentChat);
                 
                 const otherUserId = currentChat.participants.find(id => id !== currentUser.id);
                 const otherUserDoc = await db.collection('users').doc(otherUserId).get();
@@ -1872,6 +2464,9 @@
                     
                     if (otherUser.isVerified) {
                         document.getElementById('chatVerifiedIcon').style.display = 'inline';
+                        document.getElementById('chatVerifiedIcon').style.color = 
+                            otherUser.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                            otherUser.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
                     } else {
                         document.getElementById('chatVerifiedIcon').style.display = 'none';
                     }
@@ -1883,15 +2478,11 @@
                     document.getElementById('chatStatus').className = `chat-header-status ${status}`;
                 }
                 
-                // Отписываемся от старых сообщений
                 if (unsubscribeMessages) {
                     unsubscribeMessages();
                 }
                 
-                // Подписываемся на новые сообщения
                 subscribeToMessages(chatId);
-                
-                // Пытаемся загрузить сообщения без индекса
                 await loadMessagesWithoutIndex(chatId);
                 
             } catch (error) {
@@ -1900,12 +2491,9 @@
             }
         };
 
-        // Функция для загрузки сообщений без использования индекса
+        // Функция для загрузки сообщений
         async function loadMessagesWithoutIndex(chatId) {
             try {
-                console.log('Загружаем сообщения без индекса для чата:', chatId);
-                
-                // Сначала получаем все сообщения с этим chatId
                 const snapshot = await db.collection('messages')
                     .where('chatId', '==', chatId)
                     .get();
@@ -1925,8 +2513,6 @@
                     return timeA - timeB;
                 });
                 
-                console.log('Загружено сообщений:', messages.length);
-                
                 if (messages.length > 0) {
                     renderMessages(messages);
                 } else {
@@ -1939,26 +2525,8 @@
                     `;
                 }
                 
-                // Показываем ссылку на создание индекса, если сообщений много
-                if (messages.length > 10) {
-                    console.log('Для лучшей производительности создайте индекс: https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE');
-                }
-                
             } catch (error) {
                 console.error('Ошибка загрузки сообщений:', error);
-                
-                // Показываем сообщение об ошибке пользователю
-                document.getElementById('messagesContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
-                        <p>Ошибка загрузки сообщений</p>
-                        <span style="font-size: 12px; color: var(--text-secondary-light);">Требуется создать индекс в Firebase</span>
-                        <a href="https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE" 
-                           target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 20px;">
-                            Создать индекс
-                        </a>
-                    </div>
-                `;
             }
         }
 
@@ -2005,7 +2573,7 @@
                     bio: '',
                     status: 'online',
                     isVerified: false,
-                    isAdmin: false,
+                    isAdmin: email === ADMIN_EMAIL,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -2041,18 +2609,7 @@
                 await loadUserData(user.uid);
 
             } catch (error) {
-                if (error.code === 'auth/user-not-found') {
-                    if (confirm('Пользователь не найден. Создать тестового пользователя?')) {
-                        await createTestUsers();
-                        alert('Тестовые пользователи созданы. Используйте:\nАдмин: admin@golub.ru / admin123\nПользователь: user@golub.ru / user123');
-                    }
-                } else if (error.code === 'auth/wrong-password') {
-                    alert('Неверный пароль');
-                } else if (error.code === 'auth/invalid-email') {
-                    alert('Неверный формат email');
-                } else {
-                    alert('Ошибка входа: ' + error.message);
-                }
+                alert('Ошибка входа: ' + error.message);
             }
         };
 
@@ -2088,12 +2645,17 @@
             document.getElementById('userAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             document.getElementById('userStatus').className = `status ${currentUser.status || 'online'}`;
             
-            // Применяем цвет градиента к аватарам
             applyAvatarColor('userAvatar', currentUser.avatarColor);
             
             if (currentUser.isVerified) {
                 document.getElementById('verifiedBadge').style.display = 'flex';
+                document.getElementById('verifiedBadge').className = `verified-badge ${currentUser.verifiedLevel || 'blue'}`;
+                document.getElementById('verifiedBadge').innerHTML = '<i class="fas fa-check"></i>';
+                
                 document.getElementById('userVerifiedIcon').style.display = 'inline';
+                document.getElementById('userVerifiedIcon').style.color = 
+                    currentUser.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                    currentUser.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
             } else {
                 document.getElementById('verifiedBadge').style.display = 'none';
                 document.getElementById('userVerifiedIcon').style.display = 'none';
@@ -2109,16 +2671,13 @@
             document.getElementById('modalProfileAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             document.getElementById('editAvatarText').textContent = currentUser.avatar || currentUser.name[0];
             
-            // Применяем цвет к аватарам в модалке
             applyAvatarColor('modalProfileAvatar', currentUser.avatarColor);
             applyAvatarColor('editAvatarPreview', currentUser.avatarColor);
             
-            // Цвет аватара - выбираем соответствующий градиент
             document.querySelectorAll('.color-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
             
-            // Находим и выделяем выбранный градиент
             const colorOptions = document.querySelectorAll('.color-option');
             const gradientIndex = {
                 'gradient1': 0,
@@ -2133,27 +2692,21 @@
                 colorOptions[index].classList.add('selected');
             }
             
-            // Админ-панель
-            if (currentUser.isAdmin) {
-                document.getElementById('adminPanel').style.display = 'block';
-            } else {
-                document.getElementById('adminPanel').style.display = 'none';
-            }
-            
             // Статус верификации
             if (currentUser.isVerified) {
                 document.getElementById('userVerificationStatus').style.display = 'block';
-                document.getElementById('verificationLevel').textContent = currentUser.verifiedLevel || 'Verified';
+                document.getElementById('verificationLevel').textContent = 
+                    currentUser.verifiedLevel === 'blue' ? 'Синяя верификация' :
+                    currentUser.verifiedLevel === 'red' ? 'Красная верификация' : 'Фиолетовая верификация';
                 document.getElementById('verificationSignature').textContent = currentUser.verifiedSignature || '';
                 
                 const badge = document.getElementById('currentVerificationBadge');
-                badge.className = `verification-badge ${currentUser.verifiedLevel || 'gold'}`;
+                badge.className = `verification-badge ${currentUser.verifiedLevel || 'blue'}`;
             } else {
                 document.getElementById('userVerificationStatus').style.display = 'none';
             }
         }
 
-        // Функция для применения цвета градиента к аватару
         function applyAvatarColor(elementId, gradientName) {
             const element = document.getElementById(elementId);
             if (!element) return;
@@ -2209,8 +2762,6 @@
 
         // Подписка на сообщения
         function subscribeToMessages(chatId) {
-            console.log('Подписка на сообщения для чата:', chatId);
-
             unsubscribeMessages = db.collection('messages')
                 .where('chatId', '==', chatId)
                 .orderBy('timestamp', 'asc')
@@ -2222,13 +2773,11 @@
                             ...doc.data()
                         });
                     });
-                    console.log('Получены сообщения через подписку:', messages.length);
                     
                     if (messages.length > 0) {
                         renderMessages(messages);
                     }
                     
-                    // Прокручиваем вниз
                     setTimeout(() => {
                         const container = document.getElementById('messagesContainer');
                         container.scrollTop = container.scrollHeight;
@@ -2236,20 +2785,6 @@
                     
                 }, (error) => {
                     console.error('Ошибка подписки на сообщения:', error);
-                    
-                    // Если ошибка из-за индекса, показываем ссылку
-                    if (error.code === 'failed-precondition') {
-                        document.getElementById('messagesContainer').innerHTML = `
-                            <div class="empty-state">
-                                <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
-                                <p>Требуется создать индекс</p>
-                                <a href="https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE" 
-                                   target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 20px;">
-                                    Создать индекс
-                                </a>
-                            </div>
-                        `;
-                    }
                 });
         }
 
@@ -2287,9 +2822,14 @@
 
             container.innerHTML = chatsWithUsers.map(chat => {
                 const otherUser = chat.otherUser || { name: 'Пользователь', avatar: '?', isVerified: false, avatarColor: 'gradient1' };
+                
+                // Московское время
                 const time = chat.lastMessageTime ? 
-                    new Date(chat.lastMessageTime.seconds * 1000).toLocaleTimeString([], 
-                    {hour: '2-digit', minute:'2-digit'}) : '';
+                    new Date(chat.lastMessageTime.seconds * 1000).toLocaleString('ru-RU', {
+                        timeZone: 'Europe/Moscow',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '';
                 
                 const gradients = {
                     'gradient1': 'linear-gradient(135deg, #3b82f6, #06b6d4)',
@@ -2299,6 +2839,10 @@
                     'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
                 };
                 
+                const verifiedColor = 
+                    otherUser.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                    otherUser.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
+                
                 return `
                     <div class="chat-item" onclick="showChat('${chat.id}')">
                         <div class="chat-avatar" style="background: ${gradients[otherUser.avatarColor] || gradients['gradient1']}">
@@ -2307,7 +2851,7 @@
                         <div class="chat-info">
                             <h4>
                                 ${otherUser.name}
-                                ${otherUser.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                                ${otherUser.isVerified ? `<i class="fas fa-check-circle" style="color: ${verifiedColor};"></i>` : ''}
                             </h4>
                             <div class="chat-last-message">
                                 ${chat.lastMessage || 'Нет сообщений'}
@@ -2334,7 +2878,6 @@
                 return;
             }
 
-            // Загружаем данные авторов для всех сообщений
             const messagesWithAuthors = await Promise.all(messages.map(async (msg) => {
                 if (msg.userId === currentUser.id) {
                     msg.author = currentUser;
@@ -2364,12 +2907,21 @@
             
             container.innerHTML = messagesWithAuthors.map(msg => {
                 const isOwn = msg.userId === currentUser.id;
+                
+                // Московское время
                 const time = msg.timestamp ? 
-                    new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], 
-                    {hour: '2-digit', minute:'2-digit'}) : '';
+                    new Date(msg.timestamp.seconds * 1000).toLocaleString('ru-RU', {
+                        timeZone: 'Europe/Moscow',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '';
                 
                 const author = msg.author || { name: 'Пользователь', avatar: '?', avatarColor: 'gradient1' };
                 const avatarColor = author.avatarColor || 'gradient1';
+                
+                const verifiedColor = 
+                    author.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                    author.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
                 
                 return `
                     <div class="message-wrapper ${isOwn ? 'own-message' : ''}">
@@ -2380,7 +2932,7 @@
                             <div class="message-header">
                                 <span class="message-author" onclick="openUserProfileModalById('${msg.userId}')">
                                     ${author.name || 'Пользователь'}
-                                    ${author.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                                    ${author.isVerified ? `<i class="fas fa-check-circle" style="color: ${verifiedColor};"></i>` : ''}
                                 </span>
                                 <span class="message-time">${time}</span>
                             </div>
@@ -2392,7 +2944,6 @@
                 `;
             }).join('');
             
-            // Прокручиваем вниз
             container.scrollTop = container.scrollHeight;
         }
 
@@ -2407,17 +2958,17 @@
             }
             
             try {
-                const snapshot = await db.collection('users')
-                    .where('username', '>=', query)
-                    .where('username', '<=', query + '\uf8ff')
-                    .get();
+                const snapshot = await db.collection('users').get();
                 
                 const results = [];
                 snapshot.forEach(doc => {
-                    if (doc.id !== currentUser.id) {
+                    const user = doc.data();
+                    if (doc.id !== currentUser.id && 
+                        (user.name?.toLowerCase().includes(query) || 
+                         user.username?.toLowerCase().includes(query))) {
                         results.push({
                             id: doc.id,
-                            ...doc.data()
+                            ...user
                         });
                     }
                 });
@@ -2435,7 +2986,12 @@
                     'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
                 };
                 
-                resultsContainer.innerHTML = results.map(user => `
+                resultsContainer.innerHTML = results.map(user => {
+                    const verifiedColor = 
+                        user.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                        user.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
+                    
+                    return `
                     <div class="search-result-item" onclick="openUserProfileModalById('${user.id}')">
                         <div class="result-avatar" style="background: ${gradients[user.avatarColor] || gradients['gradient1']}">
                             ${user.avatar || user.name[0]}
@@ -2443,12 +2999,12 @@
                         <div class="result-info">
                             <div class="result-name">
                                 ${user.name}
-                                ${user.isVerified ? '<i class="fas fa-check-circle" style="color: var(--gold);"></i>' : ''}
+                                ${user.isVerified ? `<i class="fas fa-check-circle" style="color: ${verifiedColor};"></i>` : ''}
                             </div>
                             <div class="result-username">@${user.username}</div>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             } catch (error) {
                 console.error('Ошибка поиска:', error);
             }
@@ -2457,9 +3013,6 @@
         // Начать чат с пользователем
         window.startChatWithUser = async function(userId) {
             try {
-                console.log('Начинаем чат с пользователем:', userId);
-                
-                // Проверяем существующий чат
                 const chatsSnapshot = await db.collection('chats')
                     .where('participants', 'array-contains', currentUser.id)
                     .get();
@@ -2470,16 +3023,12 @@
                     const data = doc.data();
                     if (data.participants && data.participants.includes(userId)) {
                         existingChatId = doc.id;
-                        console.log('Найден существующий чат:', existingChatId);
                     }
                 });
                 
                 let chatId;
                 
                 if (!existingChatId) {
-                    // Создаем новый чат
-                    console.log('Создаем новый чат');
-                    
                     const chatData = {
                         participants: [currentUser.id, userId],
                         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2489,18 +3038,14 @@
                     
                     const chatRef = await db.collection('chats').add(chatData);
                     chatId = chatRef.id;
-                    console.log('Чат создан с ID:', chatId);
                     
-                    // Ждем немного, чтобы чат точно создался
                     await new Promise(resolve => setTimeout(resolve, 500));
                 } else {
                     chatId = existingChatId;
                 }
                 
-                // Открываем чат
                 await showChat(chatId);
                 
-                // Очищаем поиск
                 document.getElementById('searchInput').value = '';
                 document.getElementById('searchResults').innerHTML = '';
                 closeUserProfileModal();
@@ -2542,8 +3087,6 @@
             const input = document.getElementById('messageInput');
             const content = input.value.trim();
             
-            console.log('Попытка отправки сообщения:', { content, currentChat, currentUser });
-            
             if (!content) {
                 alert('Введите сообщение');
                 return;
@@ -2565,7 +3108,6 @@
             }
             
             try {
-                // Сохраняем сообщение
                 const messageData = {
                     chatId: currentChat.id,
                     userId: currentUser.id,
@@ -2573,21 +3115,13 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
-                console.log('Сохраняем сообщение в Firebase:', messageData);
-                
-                // Добавляем сообщение
                 const messageRef = await db.collection('messages').add(messageData);
-                console.log('Сообщение сохранено с ID:', messageRef.id);
                 
-                // Обновляем последнее сообщение в чате
                 await db.collection('chats').doc(currentChat.id).update({
                     lastMessage: content,
                     lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                console.log('Чат обновлен');
-                
-                // Очищаем поле ввода
                 input.value = '';
                 
             } catch (error) {
@@ -2617,22 +3151,20 @@
             document.getElementById('userProfileChats').textContent = '0';
             document.getElementById('userProfileStatus').textContent = user.status || 'offline';
             
-            // Применяем цвет аватара
             applyAvatarColor('userProfileAvatar', user.avatarColor);
             
             if (user.isVerified) {
                 document.getElementById('userProfileVerifiedBadge').style.display = 'flex';
+                document.getElementById('userProfileVerifiedBadge').className = `verified-badge ${user.verifiedLevel || 'blue'}`;
+                document.getElementById('userProfileVerifiedBadge').innerHTML = '<i class="fas fa-check"></i>';
+                
                 document.getElementById('userProfileVerifiedIcon').style.display = 'inline';
+                document.getElementById('userProfileVerifiedIcon').style.color = 
+                    user.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                    user.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
             } else {
                 document.getElementById('userProfileVerifiedBadge').style.display = 'none';
                 document.getElementById('userProfileVerifiedIcon').style.display = 'none';
-            }
-            
-            // Кнопка верификации для админов
-            if (currentUser && currentUser.isAdmin) {
-                document.getElementById('adminVerifyBtn').style.display = 'block';
-            } else {
-                document.getElementById('adminVerifyBtn').style.display = 'none';
             }
             
             document.getElementById('userProfileModal').classList.add('active');
@@ -2663,27 +3195,10 @@
             }
         };
 
-        window.showAdminVerify = function() {
-            closeUserProfileModal();
-            openProfileModal();
-            if (selectedUser) {
-                document.getElementById('verifyUsername').value = selectedUser.username;
-            }
-        };
-
-        window.selectVerificationLevel = function(level, event) {
-            selectedVerificationLevel = level;
-            document.querySelectorAll('.admin-btn').forEach(btn => {
-                btn.style.opacity = '1';
-            });
-            event.target.style.opacity = '0.8';
-        };
-
         // Сохранение профиля
         window.saveProfile = async function() {
             const updates = {
                 name: document.getElementById('profileName').value,
-                username: document.getElementById('profileUsername').value,
                 bio: document.getElementById('profileBio').value,
                 status: document.getElementById('profileStatusSelect').value
             };
@@ -2719,12 +3234,10 @@
             document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
             event.target.classList.add('selected');
             
-            // Применяем цвет к аватарам
             applyAvatarColor('modalProfileAvatar', gradient);
             applyAvatarColor('editAvatarPreview', gradient);
             applyAvatarColor('userAvatar', gradient);
             
-            // Сохраняем в Firebase
             try {
                 await db.collection('users').doc(currentUser.id).update({
                     avatarColor: gradient
@@ -2756,9 +3269,8 @@
                         verifiedSignature: signature
                     });
                     
-                    alert(`Статус ${selectedVerificationLevel} присвоен пользователю ${username}!`);
+                    alert(`Статус верификации присвоен пользователю ${username}!`);
                     
-                    // Если верифицируем текущего пользователя
                     if (userDoc.id === currentUser.id) {
                         currentUser.isVerified = true;
                         currentUser.verifiedLevel = selectedVerificationLevel;
@@ -2776,40 +3288,6 @@
                 alert('Ошибка при выдаче верификации');
             }
         };
-
-        // Функция для отладки
-        window.debugChat = async function() {
-            console.log('=== ОТЛАДКА ЧАТА ===');
-            console.log('Текущий пользователь:', currentUser);
-            console.log('Текущий чат:', currentChat);
-            
-            if (currentChat) {
-                try {
-                    const messagesSnapshot = await db.collection('messages')
-                        .where('chatId', '==', currentChat.id)
-                        .get();
-                    
-                    console.log('Сообщения в чате:');
-                    const messages = [];
-                    messagesSnapshot.forEach(doc => {
-                        messages.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    console.log(messages);
-                } catch (error) {
-                    console.error('Ошибка загрузки сообщений:', error);
-                }
-            }
-            
-            console.log('=== КОНЕЦ ОТЛАДКИ ===');
-        };
-
-        // Добавляем кнопку отладки в консоль
-        console.log('Для отладки чата введите в консоль: debugChat()');
-        console.log('ИЛИ перейдите по ссылке для создания индекса:');
-        console.log('https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE');
     </script>
 </body>
 </html>
