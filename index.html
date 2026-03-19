@@ -68,12 +68,15 @@
             color: var(--text-dark);
         }
 
+        /* Исправленный режим техработ */
         body.maintenance-mode .auth-container,
         body.maintenance-mode .dashboard-container,
         body.maintenance-mode .chat-container {
             filter: blur(5px);
             pointer-events: none;
             user-select: none;
+            opacity: 0.5;
+            transition: all 0.3s ease;
         }
 
         .maintenance-overlay {
@@ -83,7 +86,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(135deg, rgba(11, 17, 32, 0.98), rgba(30, 41, 59, 0.98));
+            backdrop-filter: blur(10px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -93,8 +97,13 @@
             padding: 20px;
         }
 
+        .dark-theme .maintenance-overlay {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(11, 17, 32, 0.98));
+        }
+
         body.maintenance-mode .maintenance-overlay {
             display: flex;
+            animation: fadeIn 0.5s ease-out;
         }
 
         .maintenance-logo {
@@ -104,6 +113,8 @@
             margin-bottom: 30px;
             border: 4px solid var(--primary);
             object-fit: cover;
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.5);
+            animation: pulse 2s infinite;
         }
 
         .maintenance-title {
@@ -122,13 +133,23 @@
             line-height: 1.6;
         }
 
+        @keyframes pulse {
+            0% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 60px rgba(59, 130, 246, 0.7); }
+            100% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Управление */
         .theme-control {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
-            display: flex;
-            gap: 10px;
         }
 
         .settings-btn {
@@ -156,29 +177,9 @@
             box-shadow: 0 0 30px var(--primary);
         }
 
+        /* Кнопка темы скрыта */
         .theme-toggle {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--surface-light);
-            border: 2px solid var(--primary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: var(--shadow-light);
-            transition: var(--transition);
-        }
-
-        .dark-theme .theme-toggle {
-            background: var(--surface-dark);
-            box-shadow: var(--shadow-dark);
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1) rotate(15deg);
-            box-shadow: 0 0 30px var(--primary);
+            display: none;
         }
 
         .auth-logo {
@@ -189,6 +190,7 @@
             display: block;
             border: 3px solid var(--primary);
             object-fit: cover;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
         }
 
         #app {
@@ -1059,6 +1061,9 @@
             margin-bottom: 30px;
             border-bottom: 2px solid var(--border-light);
             padding-bottom: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
         }
 
         .dark-theme .modal-tabs {
@@ -1075,6 +1080,7 @@
             font-weight: 600;
             transition: var(--transition);
             border-radius: 30px;
+            flex-shrink: 0;
         }
 
         .modal-tab:hover {
@@ -1448,6 +1454,293 @@
             display: none;
         }
 
+        /* Стили для переключателя */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Мобильная адаптация */
+        @media (max-width: 1024px) {
+            .dashboard-content {
+                grid-template-columns: 280px 1fr;
+                gap: 20px;
+            }
+            
+            .chat-container {
+                height: 95vh;
+                border-radius: var(--border-radius);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .left-panel {
+                order: 2;
+                margin-top: 0;
+            }
+            
+            .right-panel {
+                order: 1;
+            }
+            
+            .theme-control {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .settings-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.3rem;
+            }
+            
+            .auth-card {
+                padding: 30px 20px;
+            }
+            
+            .message-wrapper {
+                max-width: 85%;
+            }
+            
+            .chat-header {
+                padding: 12px 16px;
+            }
+            
+            .chat-header-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+            
+            .chat-header-text h2 {
+                font-size: 1.1rem;
+            }
+            
+            .messages-container {
+                padding: 15px;
+            }
+            
+            .chat-input-container {
+                padding: 12px 15px;
+            }
+            
+            .send-btn {
+                width: 48px;
+                height: 48px;
+            }
+            
+            .admin-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-header {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .user-info {
+                padding: 5px 10px 5px 5px;
+            }
+            
+            .avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+            
+            .btn-logout {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .left-panel, .right-panel {
+                padding: 20px;
+            }
+            
+            .search-section h3, .create-chat-section h3 {
+                font-size: 1rem;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+            
+            .modal-tabs {
+                gap: 5px;
+            }
+            
+            .modal-tab {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .settings-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .settings-item-action {
+                width: 100%;
+            }
+            
+            .settings-item-action button {
+                width: 100%;
+            }
+            
+            .profile-name {
+                font-size: 1.5rem;
+            }
+            
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            .chat-item {
+                padding: 12px;
+            }
+            
+            .chat-avatar {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+            
+            .chat-last-message {
+                max-width: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .btn-logout {
+                align-self: flex-end;
+            }
+            
+            .message-wrapper {
+                max-width: 95%;
+            }
+            
+            .profile-actions {
+                flex-direction: column;
+            }
+            
+            .auth-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .auth-logo {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .maintenance-logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .maintenance-title {
+                font-size: 2rem;
+            }
+            
+            .maintenance-text {
+                font-size: 1rem;
+            }
+            
+            .modal-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .modal-tab {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .chat-last-message {
+                max-width: 120px;
+            }
+            
+            .message-time {
+                font-size: 0.65rem;
+            }
+            
+            .message-author {
+                font-size: 0.85rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -1496,114 +1789,6 @@
         .dark-theme .empty-state p {
             color: var(--text-dark);
         }
-
-        @media (max-width: 1024px) {
-            .dashboard-content {
-                grid-template-columns: 280px 1fr;
-                gap: 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .left-panel {
-                order: 2;
-            }
-            
-            .right-panel {
-                order: 1;
-            }
-            
-            .theme-control {
-                top: 10px;
-                right: 10px;
-            }
-            
-            .theme-toggle {
-                width: 44px;
-                height: 44px;
-                font-size: 1.3rem;
-            }
-            
-            .auth-card {
-                padding: 32px 20px;
-            }
-            
-            .message-wrapper {
-                max-width: 85%;
-            }
-            
-            .chat-header {
-                padding: 16px;
-            }
-            
-            .chat-header-avatar {
-                width: 44px;
-                height: 44px;
-                font-size: 1.2rem;
-            }
-            
-            .chat-header-text h2 {
-                font-size: 1.2rem;
-            }
-            
-            .messages-container {
-                padding: 20px;
-            }
-            
-            .chat-input-container {
-                padding: 16px 20px;
-            }
-            
-            .send-btn {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .admin-actions {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-content {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
-            
-            .btn-logout {
-                align-self: flex-end;
-            }
-            
-            .message-wrapper {
-                max-width: 95%;
-            }
-            
-            .profile-actions {
-                flex-direction: column;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
-        }
     </style>
 </head>
 <body>
@@ -1620,9 +1805,7 @@
         <button class="settings-btn" onclick="openSettingsModal()">
             <i class="fas fa-cog"></i>
         </button>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            <span class="theme-icon">🌙</span>
-        </button>
+        <!-- Кнопка темы скрыта -->
     </div>
 
     <div id="app">
@@ -1905,13 +2088,13 @@
                         <h3><i class="fas fa-crown"></i> Управление верификацией</h3>
                         
                         <div class="admin-actions">
-                            <button class="admin-btn blue" onclick="selectVerificationLevel('blue')">
+                            <button class="admin-btn blue" onclick="selectVerificationLevel('blue', event)">
                                 <i class="fas fa-check-circle"></i> Синяя
                             </button>
-                            <button class="admin-btn red" onclick="selectVerificationLevel('red')">
+                            <button class="admin-btn red" onclick="selectVerificationLevel('red', event)">
                                 <i class="fas fa-check-circle"></i> Красная
                             </button>
-                            <button class="admin-btn purple" onclick="selectVerificationLevel('purple')">
+                            <button class="admin-btn purple" onclick="selectVerificationLevel('purple', event)">
                                 <i class="fas fa-check-circle"></i> Фиолетовая
                             </button>
                         </div>
@@ -1919,6 +2102,11 @@
                         <div class="form-group" style="margin-bottom: 15px;">
                             <label>Username пользователя</label>
                             <input type="text" id="verifyUsername" placeholder="@username" style="padding-left: 16px;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label>Подпись верификации</label>
+                            <input type="text" id="verificationSignature" placeholder="Например: Официальный аккаунт" style="padding-left: 16px;">
                         </div>
 
                         <button class="btn-primary" onclick="verifyUser()" style="margin-bottom: 30px;">
@@ -2116,14 +2304,11 @@
         // Переключение темы
         window.toggleTheme = function() {
             const body = document.body;
-            const icon = document.querySelector('.theme-icon');
             body.classList.toggle('dark-theme');
             
             if (body.classList.contains('dark-theme')) {
-                icon.textContent = '☀️';
                 localStorage.setItem('theme', 'dark');
             } else {
-                icon.textContent = '🌙';
                 localStorage.setItem('theme', 'light');
             }
         };
@@ -2132,7 +2317,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-theme');
-                document.querySelector('.theme-icon').textContent = '☀️';
             }
 
             // Проверка авторизации
@@ -2234,7 +2418,7 @@
             }
         };
 
-        window.selectVerificationLevel = function(level) {
+        window.selectVerificationLevel = function(level, event) {
             selectedVerificationLevel = level;
             document.querySelectorAll('.admin-btn').forEach(btn => {
                 btn.style.opacity = '0.5';
@@ -2272,7 +2456,12 @@
                 'gradient5': 'linear-gradient(135deg, #f59e0b, #fbbf24)'
             };
 
-            container.innerHTML = allUsersList.map(user => `
+            container.innerHTML = allUsersList.map(user => {
+                const verifiedColor = 
+                    user.verifiedLevel === 'blue' ? 'var(--blue-verified)' :
+                    user.verifiedLevel === 'red' ? 'var(--red-verified)' : 'var(--purple-verified)';
+                
+                return `
                 <div class="user-list-item" onclick="selectUserForBan('${user.id}')">
                     <div class="user-list-avatar" style="background: ${gradients[user.avatarColor] || gradients['gradient1']}">
                         ${user.avatar || user.name[0]}
@@ -2280,13 +2469,13 @@
                     <div class="user-list-info">
                         <div class="user-list-name">
                             ${user.name}
-                            ${user.isVerified ? '<i class="fas fa-check-circle" style="color: var(--blue-verified);"></i>' : ''}
+                            ${user.isVerified ? `<i class="fas fa-check-circle" style="color: ${verifiedColor};"></i>` : ''}
                         </div>
                         <div class="user-list-username">@${user.username}</div>
                     </div>
                     <input type="radio" name="selectedUser" value="${user.id}" style="display: none;">
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         window.selectUserForBan = function(userId) {
@@ -2341,22 +2530,40 @@
             }
         };
 
+        // Исправленная функция режима техработ
         window.toggleMaintenanceMode = function() {
             maintenanceMode = !maintenanceMode;
             const btn = document.getElementById('maintenanceBtn');
             
             if (maintenanceMode) {
-                document.body.classList.add('maintenance-mode');
                 btn.innerHTML = '<i class="fas fa-power-off"></i> Выключить';
                 btn.style.background = 'var(--danger)';
+                
+                // Сохраняем режим в localStorage для всех пользователей
+                localStorage.setItem('maintenanceMode', 'true');
             } else {
-                document.body.classList.remove('maintenance-mode');
                 btn.innerHTML = '<i class="fas fa-power-off"></i> Включить';
                 btn.style.background = '';
+                
+                // Удаляем режим из localStorage
+                localStorage.setItem('maintenanceMode', 'false');
             }
+            
+            // Применяем режим для всех пользователей
+            applyMaintenanceMode();
         };
 
-        // Остальные функции из вашего кода (они остаются без изменений)
+        // Функция для применения режима техработ
+        function applyMaintenanceMode() {
+            const maintenanceEnabled = localStorage.getItem('maintenanceMode') === 'true';
+            
+            if (maintenanceEnabled && currentUser && !currentUser.isAdmin) {
+                document.body.classList.add('maintenance-mode');
+            } else {
+                document.body.classList.remove('maintenance-mode');
+            }
+        }
+
         // Загрузка данных пользователя
         async function loadUserData(userId) {
             try {
@@ -2380,9 +2587,15 @@
                     subscribeToUsers();
 
                     // Проверяем режим обслуживания
-                    if (maintenanceMode && !currentUser.isAdmin) {
-                        document.body.classList.add('maintenance-mode');
-                    }
+                    applyMaintenanceMode();
+                    
+                    // Слушаем изменения режима в localStorage
+                    window.addEventListener('storage', function(e) {
+                        if (e.key === 'maintenanceMode') {
+                            applyMaintenanceMode();
+                        }
+                    });
+                    
                 } else {
                     // Если документа нет, создаем
                     const userData = {
@@ -2405,6 +2618,9 @@
                     showDashboard();
                     subscribeToChats();
                     subscribeToUsers();
+                    
+                    // Проверяем режим обслуживания
+                    applyMaintenanceMode();
                 }
             } catch (error) {
                 console.error('Ошибка загрузки пользователя:', error);
