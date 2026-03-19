@@ -1891,8 +1891,8 @@
                 // Подписываемся на новые сообщения
                 subscribeToMessages(chatId);
                 
-                // Дополнительно загружаем сообщения сразу
-                await loadMessagesDirectly(chatId);
+                // Пытаемся загрузить сообщения без индекса
+                await loadMessagesWithoutIndex(chatId);
                 
             } catch (error) {
                 console.error('Ошибка загрузки чата:', error);
@@ -1900,14 +1900,14 @@
             }
         };
 
-        // Функция для прямой загрузки сообщений (без подписки)
-        async function loadMessagesDirectly(chatId) {
+        // Функция для загрузки сообщений без использования индекса
+        async function loadMessagesWithoutIndex(chatId) {
             try {
-                console.log('Прямая загрузка сообщений для чата:', chatId);
+                console.log('Загружаем сообщения без индекса для чата:', chatId);
                 
+                // Сначала получаем все сообщения с этим chatId
                 const snapshot = await db.collection('messages')
                     .where('chatId', '==', chatId)
-                    .orderBy('timestamp', 'asc')
                     .get();
                 
                 const messages = [];
@@ -1916,6 +1916,13 @@
                         id: doc.id,
                         ...doc.data()
                     });
+                });
+                
+                // Сортируем вручную по timestamp
+                messages.sort((a, b) => {
+                    const timeA = a.timestamp?.seconds || 0;
+                    const timeB = b.timestamp?.seconds || 0;
+                    return timeA - timeB;
                 });
                 
                 console.log('Загружено сообщений:', messages.length);
@@ -1932,8 +1939,26 @@
                     `;
                 }
                 
+                // Показываем ссылку на создание индекса, если сообщений много
+                if (messages.length > 10) {
+                    console.log('Для лучшей производительности создайте индекс: https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE');
+                }
+                
             } catch (error) {
-                console.error('Ошибка прямой загрузки сообщений:', error);
+                console.error('Ошибка загрузки сообщений:', error);
+                
+                // Показываем сообщение об ошибке пользователю
+                document.getElementById('messagesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                        <p>Ошибка загрузки сообщений</p>
+                        <span style="font-size: 12px; color: var(--text-secondary-light);">Требуется создать индекс в Firebase</span>
+                        <a href="https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE" 
+                           target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 20px;">
+                            Создать индекс
+                        </a>
+                    </div>
+                `;
             }
         }
 
@@ -2211,6 +2236,20 @@
                     
                 }, (error) => {
                     console.error('Ошибка подписки на сообщения:', error);
+                    
+                    // Если ошибка из-за индекса, показываем ссылку
+                    if (error.code === 'failed-precondition') {
+                        document.getElementById('messagesContainer').innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                                <p>Требуется создать индекс</p>
+                                <a href="https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE" 
+                                   target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 20px;">
+                                    Создать индекс
+                                </a>
+                            </div>
+                        `;
+                    }
                 });
         }
 
@@ -2751,9 +2790,14 @@
                         .get();
                     
                     console.log('Сообщения в чате:');
+                    const messages = [];
                     messagesSnapshot.forEach(doc => {
-                        console.log(doc.id, '=>', doc.data());
+                        messages.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
                     });
+                    console.log(messages);
                 } catch (error) {
                     console.error('Ошибка загрузки сообщений:', error);
                 }
@@ -2764,6 +2808,8 @@
 
         // Добавляем кнопку отладки в консоль
         console.log('Для отладки чата введите в консоль: debugChat()');
+        console.log('ИЛИ перейдите по ссылке для создания индекса:');
+        console.log('https://console.firebase.google.com/v1/r/project/golub-messenger-77db5/firestore/indexes?create_composite=Cltwcm9qZWN0cy9nb2x1Yi1tZXNzZW5nZXItNzdkYjUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL21lc3NhZ2VzL2luZGV4ZXMvXxABGgoKBmNoYXRJZBABGg0KCXRpbWVzdGFtcBABGgwKCF9fbmFtZV9fEAE');
     </script>
 </body>
 </html>
