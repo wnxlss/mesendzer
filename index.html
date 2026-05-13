@@ -1271,6 +1271,8 @@
         white-space:nowrap;
         max-width: 210px;
       }
+
+     
       .avaImg{
         width: 100%;
         height: 100%;
@@ -1302,12 +1304,17 @@
         .appPage.mobileChatOpen .sidebar{display:none}
         .appPage.mobileChatOpen .chatPane{display:flex}
       }
+/* MAX подписка */
+.maxBadge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#7c3aed,#3b82f6);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;color:#fff;margin-left:6px;vertical-align:middle;box-shadow:0 0 6px rgba(124,58,237,0.4)}.maxExpire{font-size:9px;opacity:0.9;margin-left:3px}.maxName{background:linear-gradient(135deg,#c084fc,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}.maxSubscribeBtn{background:linear-gradient(135deg,#7c3aed,#3b82f6);border:none;border-radius:999px;padding:8px 12px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;justify-content:center;width:100%;margin-bottom:8px}.maxSubscribeBtn:hover{transform:translateY(-1px);opacity:0.9}.maxModal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}.maxModalCard{background:var(--card);border-radius:24px;padding:24px;max-width:340px;width:90%;border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,0.3)}.maxModalTitle{font-size:24px;font-weight:900;background:linear-gradient(135deg,#c084fc,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin-bottom:16px}.maxFeature{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}.maxFeature svg{width:20px;height:20px;color:#7c3aed;flex-shrink:0}.maxPrice{background:linear-gradient(135deg,#7c3aed,#3b82f6);padding:14px;border-radius:16px;text-align:center;color:#fff;font-weight:800;margin:16px 0;cursor:pointer}.maxClose{background:transparent;border:1px solid var(--border);padding:10px;border-radius:999px;width:100%;cursor:pointer;color:var(--muted)}
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+    <script src="https://yoomoney.ru/checkout/v2/checkout.js"></script>
+
   </head>
+
   <body>
     <main class="authPage" id="authView">
       <div class="wrap">
@@ -1391,6 +1398,11 @@
               </div>
             </div>
             <div class="sideActions">
+              <button class="maxSubscribeBtn" id="maxSubscribeBtn">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+  MAX · 250 ₽
+</button>
+</button>
               <button class="iconBtn" id="settingsBtn" type="button" aria-label="Настройки">
                 <svg class="icon16" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
                   <path d="M4 6h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -2471,7 +2483,7 @@
             } else {
               const userEmail = findEmailByUsername(c.peerUsername || c.name || "");
               const user = userEmail ? readUsers()[userEmail] : null;
-              badge = user ? badgeMarkHtml(user) : "";
+badge = user ? badgeMarkHtmlWithMax(user) : "";
             }
             return `
               <div class="chatItem ${active}" data-id="${escapeHtml(c.id)}" role="button" tabindex="0">
@@ -2520,7 +2532,7 @@
         const chatUserEmail = !isChannel ? findEmailByUsername(chat.peerUsername || chat.name || "") : "";
         const chatUser = chatUserEmail ? readUsers()[chatUserEmail] : null;
         els.chatName.classList.toggle("clickable", true);
-        els.chatName.innerHTML = `${escapeHtml(chat.name)}${isChannel ? channelBadgeHtml(chat) : (chatUser ? badgeMarkHtml(chatUser) : "")}`;
+        els.chatName.innerHTML = `${escapeHtml(chat.name)}${isChannel ? channelBadgeHtml(chat) : (chatUser ? badgeMarkHtmlWithMax(chatUser) : "")}`;
         if (isChannel) {
           els.chatSub.textContent = `${chat.visibility === "public" ? "публичный" : "приватный"} • ${chat.description || "без описания"}`;
         } else {
@@ -2804,10 +2816,23 @@
       }
 
       function badgeMarkHtml(u) {
-        const c = badgeColorForUser(u);
-        if (!c) return "";
-        return `<span class="check ${c}" title="галочка"></span>`;
-      }
+  const c = badgeColorForUser(u);
+  if (!c) return "";
+  return `<span class="check ${c}" title="галочка"></span>`;
+}
+
+function badgeMarkHtmlWithMax(u) {
+  const c = badgeColorForUser(u);
+  const maxSub = u?.email ? getUserMax(u.email) : null;
+  let maxHtml = "";
+  if (maxSub) {
+    const expireDate = new Date(maxSub.exp);
+    const formattedDate = expireDate.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" });
+    maxHtml = `<span class="maxBadge" title="MAX подписка до ${formattedDate}">⭐ MAX · ${formattedDate}</span>`;
+  }
+  if (!c && !maxHtml) return "";
+  return `${c ? `<span class="check ${c}"></span>` : ""}${maxHtml}`;
+}
 
       function renderAvatar(el, avatarDataUrl, textFallback) {
         if (!el) return;
@@ -2912,7 +2937,7 @@
         const phone = u?.profile?.phone || "";
         const bio = u?.profile?.bio || "";
         const avatar = u?.profile?.avatar || "";
-        const badge = badgeMarkHtml(u);
+        const badge = badgeMarkHtmlWithMax(u);
 
         renderAvatar(els.userAva, avatar, initials(username));
         els.userLine.innerHTML = `<span class="userLineName">@${escapeHtml(u?.username || session?.username || "user")}</span>${badge}`;
@@ -2967,7 +2992,7 @@
       function loadSettingsForUser() {
         const u = getCurrentUser();
         if (!u) return;
-        els.profileUsername.innerHTML = `<span>@${escapeHtml(u.username)}</span>${badgeMarkHtml(u)}`;
+        els.profileUsername.innerHTML = `<span>@${escapeHtml(u.username)}</span>${badgeMarkHtmlWithMax(u)}`;
         els.profileEmail.textContent = u.email;
         els.profilePhone.value = u.profile?.phone || "";
         els.profileBio.value = u.profile?.bio || "";
@@ -3277,7 +3302,7 @@
         const items = Object.values(users).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         els.adminUsersList.innerHTML = items
           .map((u) => {
-            const badge = badgeMarkHtml(u);
+            const badge = badgeMarkHtmlWithMax(u);
             const blocked = u.blocked ? `<span class="pill" style="border-color:rgba(255,59,59,0.35);background:rgba(255,59,59,0.10)">заблокирован</span>` : "";
             const btnBlock = u.blocked ? "Разблок." : "Блок";
             return `
@@ -4201,6 +4226,67 @@
       }
 
       bootstrap();
+// ========== MAX ПОДПИСКА ==========
+const YOOMONEY_WALLET = "4100118609737762" 
+
+function getMaxSub(){try{return JSON.parse(localStorage.getItem("golub_max_subs")||"{}")}catch{return{}}}
+function saveMaxSub(s){localStorage.setItem("golub_max_subs",JSON.stringify(s))}
+function getUserMax(e){if(!e)return null;let s=getMaxSub(),u=s[e];if(u&&u.exp&&u.exp<Date.now()){delete s[e];saveMaxSub(s);return null}return u}
+function setUserMax(e){let s=getMaxSub(),n=Date.now()+30*24*60*60*1000;s[e]={exp:n,at:Date.now()};saveMaxSub(s);return s[e]}
+function getMaxBadge(e){let u=getUserMax(e);if(!u)return "";let d=new Date(u.exp);return `<span class="maxBadge" title="MAX до ${d.toLocaleDateString("ru-RU")}">⭐ MAX · ${d.toLocaleDateString("ru-RU",{month:"short",day:"numeric"})}</span>`}
+function hasMax(e){return!!getUserMax(e)}
+
+function showMaxModal(){
+  let modal=document.createElement("div");modal.className="maxModal";
+  modal.innerHTML=`
+    <div class="maxModalCard">
+      <div class="maxModalTitle">⭐ MAX подписка</div>
+      <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg><span>🎨 <strong>Цветное имя</strong> — градиентное выделение в чатах</span></div>
+      <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v8H4v-8M12 2v4M12 18v4"/><rect x="2" y="6" width="20" height="8" rx="2"/></svg><span>🏷️ <strong>Эксклюзивный значок</strong> ⭐ MAX с датой покупки</span></div>
+      <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg><span>⏱️ <strong>Приоритет в поиске</strong> — ваши чаты выше в списке</span></div>
+      <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg><span>👑 <strong>Поддержка проекта</strong> — помогаете развитию golub</span></div>
+      <div class="maxPrice" id="maxPayBtn">💳 Оплатить 250 ₽ (ЮMoney)</div>
+      <button class="maxClose" id="maxCloseBtn">Закрыть</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById("maxPayBtn").onclick=()=>{
+    if(!session||!session.email){showToast("Сначала войдите");modal.remove();return}
+    let email=session.email.toLowerCase();
+    if(hasMax(email)){showToast("У вас уже есть MAX подписка!");modal.remove();return}
+    let form=document.createElement("form");form.method="POST";form.action="https://yoomoney.ru/quickpay/confirm.xml";form.target="_blank";
+    [{name:"receiver",value:YOOMONEY_WALLET},{name:"quickpay-form",value:"shop"},{name:"targets",value:`MAX подписка для @${session.username}`},{name:"paymentType",value:"AC"},{name:"sum",value:"250"},{name:"label",value:`${email}|${session.username}|${Date.now()}`},{name:"successURL",value:window.location.href}].forEach(p=>{let i=document.createElement("input");i.type="hidden";i.name=p.name;i.value=p.value;form.appendChild(i)});
+    document.body.appendChild(form);form.submit();document.body.removeChild(form);
+    localStorage.setItem("golub_max_pending",email);
+    let check=setInterval(()=>{if(hasMax(email)){clearInterval(check);localStorage.removeItem("golub_max_pending");showToast("✅ MAX активирована!");modal.remove();updateMaxDisplay();renderChatList();renderChatPane()}},3000);
+    setTimeout(()=>clearInterval(check),180000);
+    showToast("💰 Откроется окно оплаты");
+  };
+  document.getElementById("maxCloseBtn").onclick=()=>modal.remove();
+  modal.onclick=(e)=>{if(e.target===modal)modal.remove()};
+}
+
+function updateMaxDisplay(){
+  let btn=document.getElementById("maxSubscribeBtn");
+  if(!btn)return;
+  let email=session?.email?.toLowerCase();
+  let sub=getUserMax(email);
+  if(sub){
+    let days=Math.ceil((sub.exp-Date.now())/86400000);
+    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>⭐ MAX · ${days} дн.`;
+  } else {
+    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>MAX · 250 ₽`;
+  }
+}
+
+setTimeout(()=>{
+  let btn=document.getElementById("maxSubscribeBtn");
+  if(btn)btn.onclick=()=>{
+    if(!session||!session.email){showToast("Сначала войдите");return}
+    showMaxModal();
+  };
+  updateMaxDisplay();
+},500);
     </script>
   </body>
 </html>
