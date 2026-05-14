@@ -1304,15 +1304,756 @@
         .appPage.mobileChatOpen .sidebar{display:none}
         .appPage.mobileChatOpen .chatPane{display:flex}
       }
-/* MAX подписка */
-.maxBadge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#7c3aed,#3b82f6);border-radius:999px;padding:2px 8px;font-size:10px;font-weight:800;color:#fff;margin-left:6px;vertical-align:middle;box-shadow:0 0 6px rgba(124,58,237,0.4)}.maxExpire{font-size:9px;opacity:0.9;margin-left:3px}.maxName{background:linear-gradient(135deg,#c084fc,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900}.maxSubscribeBtn{background:linear-gradient(135deg,#7c3aed,#3b82f6);border:none;border-radius:999px;padding:8px 12px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;justify-content:center;width:100%;margin-bottom:8px}.maxSubscribeBtn:hover{transform:translateY(-1px);opacity:0.9}.maxModal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}.maxModalCard{background:var(--card);border-radius:24px;padding:24px;max-width:340px;width:90%;border:1px solid var(--border);box-shadow:0 20px 40px rgba(0,0,0,0.3)}.maxModalTitle{font-size:24px;font-weight:900;background:linear-gradient(135deg,#c084fc,#60a5fa);-webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;margin-bottom:16px}.maxFeature{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}.maxFeature svg{width:20px;height:20px;color:#7c3aed;flex-shrink:0}.maxPrice{background:linear-gradient(135deg,#7c3aed,#3b82f6);padding:14px;border-radius:16px;text-align:center;color:#fff;font-weight:800;margin:16px 0;cursor:pointer}.maxClose{background:transparent;border:1px solid var(--border);padding:10px;border-radius:999px;width:100%;cursor:pointer;color:var(--muted)}
+
+
+/* ========== MAX ПОДПИСКА ========== */
+
+/* Бейдж MAX */
+.maxBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  margin-left: 6px;
+  vertical-align: middle;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  transition: all 0.2s ease;
+}
+
+.maxBadge:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+/* Срок действия MAX */
+.maxExpire {
+  font-size: 9px;
+  opacity: 0.9;
+  margin-left: 4px;
+}
+
+/* Имя пользователя с MAX */
+.maxName {
+  background: linear-gradient(135deg, #c084fc, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 900;
+  display: inline-block;
+}
+
+/* Кнопка покупки MAX */
+.maxSubscribeBtn {
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.maxSubscribeBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.maxSubscribeBtn:hover::before {
+  left: 100%;
+}
+
+.maxSubscribeBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+}
+
+.maxSubscribeBtn:active {
+  transform: translateY(0px);
+}
+
+/* Модальное окно MAX */
+.maxModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Карточка модального окна */
+.maxModalCard {
+  background: var(--card);
+  border-radius: 32px;
+  padding: 28px 24px 24px;
+  max-width: 360px;
+  width: 90%;
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Заголовок MAX */
+.maxModalTitle {
+  font-size: 26px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #c084fc, #60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Пункт преимущества MAX */
+.maxFeature {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  transition: background 0.2s ease;
+  border-radius: 12px;
+}
+
+.maxFeature:hover {
+  background: rgba(124, 58, 237, 0.05);
+  padding-left: 8px;
+}
+
+.maxFeature svg {
+  width: 22px;
+  height: 22px;
+  color: #7c3aed;
+  flex-shrink: 0;
+}
+
+/* Кнопка оплаты */
+.maxPrice {
+  background: linear-gradient(135deg, #7c3aed, #3b82f6);
+  padding: 14px;
+  border-radius: 20px;
+  text-align: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  margin: 20px 0 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.maxPrice::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.maxPrice:hover::before {
+  left: 100%;
+}
+
+.maxPrice:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+}
+
+/* Кнопка закрытия */
+.maxClose {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: 999px;
+  width: 100%;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.maxClose:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: #7c3aed;
+  color: #7c3aed;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}      
+    
+/* Счётчик подписчиков */
+.subscribers-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(45,124,255,0.12);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-left: 8px;
+}
+.subscribers-counter svg {
+  width: 14px;
+  height: 14px;
+}
+.subscribers-count {
+  font-weight: 800;
+  margin-left: 2px;
+}
+
+.toast {
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Анимация только для новых сообщений (не会影响 уже существующие) */
+.msgRow:last-child {
+  animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ava {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ava:active {
+  transform: scale(0.96);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary2);
+}
+
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bubbleOther);
+  border-radius: 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+.msgText a {
+  color: var(--primary);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--primary);
+}
+.msgText a:hover {
+  border-bottom: 1px solid var(--primary);
+}
+
+.bubble {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.bubble:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.badge {
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.settingsView, .profileModalBackdrop, .channelModalBackdrop, .mediaViewerBackdrop {
+  animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to { opacity: 1; backdrop-filter: blur(10px); }
+}
+
+/* ========== АДАПТИВНОСТЬ ДЛЯ ВСЕХ УСТРОЙСТВ ========== */
+
+/* Планшеты (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .sidebar {
+    width: 300px;
+    min-width: 260px;
+  }
+  
+  .chatTitleName {
+    font-size: 13px;
+  }
+  
+  .chatTitleSub {
+    font-size: 11px;
+  }
+  
+  .msgText {
+    font-size: 12px;
+  }
+  
+  .bubble {
+    padding: 8px 10px;
+  }
+}
+
+/* Телефоны (до 768px) */
+@media (max-width: 768px) {
+  .appPage {
+    padding: 0;
+  }
+  
+  .appFrame {
+    border-radius: 0;
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .sideHeader {
+    padding: 12px 12px 8px;
+  }
+  
+  .sideBrandName {
+    font-size: 16px;
+  }
+  
+  .ava {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .chatName {
+    font-size: 13px;
+  }
+  
+  .chatLast {
+    font-size: 11px;
+  }
+  
+  .chatTime {
+    font-size: 10px;
+  }
+  
+  /* Сообщения на телефоне */
+  .msgRowSide {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .msgBody {
+    max-width: 85%;
+  }
+  
+  .msgText {
+    font-size: 12px;
+  }
+  
+  .bubble {
+    padding: 8px 10px;
+  }
+  
+  .msgTop {
+    gap: 4px;
+    margin-bottom: 2px;
+  }
+  
+  .msgSenderBtn {
+    font-size: 11px;
+  }
+  
+  .msgMeta {
+    font-size: 9px;
+  }
+  
+  .msgActionBtn {
+    padding: 2px 4px;
+    font-size: 8px;
+  }
+  
+  /* Композитор на телефоне */
+  .composer {
+    padding: 8px 10px 12px;
+    gap: 6px;
+  }
+  
+  .composerBox {
+    padding: 8px 10px;
+  }
+  
+  .composerInput {
+    font-size: 13px;
+  }
+  
+  .sendBtn {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .sendBtn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .iconBtn {
+    padding: 8px;
+  }
+  
+  .icon16 {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* MAX кнопка */
+  .maxSubscribeBtn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .maxSubscribeBtn svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Маленькие телефоны (до 480px) */
+@media (max-width: 480px) {
+  .sideHeader {
+    padding: 10px 10px 6px;
+  }
+  
+  .sideBrandName {
+    font-size: 14px;
+  }
+  
+  .sideBrandSub {
+    font-size: 10px;
+  }
+  
+  .searchBox {
+    padding: 8px 12px;
+  }
+  
+  .searchInput {
+    font-size: 12px;
+  }
+  
+  .chatItem {
+    padding: 8px 8px;
+    gap: 8px;
+  }
+  
+  .ava {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .chatName {
+    font-size: 12px;
+  }
+  
+  .chatLast {
+    font-size: 10px;
+  }
+  
+  .badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+  
+  /* Сообщения */
+  .msgRowSide {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .msgBody {
+    max-width: 88%;
+  }
+  
+  .bubble {
+    padding: 6px 8px;
+    border-radius: 10px;
+  }
+  
+  .msgText {
+    font-size: 11px;
+  }
+  
+  .msgMediaImg, .msgMediaVideo {
+    max-width: 220px;
+  }
+  
+  .msgAudioWrap {
+    width: 200px;
+  }
+  
+  /* Композитор */
+  .composerActions {
+    gap: 4px;
+  }
+  
+  .composerBox {
+    padding: 6px 10px;
+  }
+  
+  .sendBtn {
+    width: 34px;
+    height: 34px;
+  }
+  
+  /* Модальные окна */
+  .maxModalCard {
+    padding: 20px 16px 16px;
+    max-width: 300px;
+  }
+  
+  .maxModalTitle {
+    font-size: 22px;
+  }
+  
+  .maxFeature {
+    font-size: 12px;
+    gap: 10px;
+    padding: 8px 0;
+  }
+  
+  .maxFeature svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .maxPrice {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .profileModal {
+    width: 90%;
+    padding: 12px;
+  }
+  
+  .profileName {
+    font-size: 16px;
+  }
+  
+  .settingsCard {
+    width: 95%;
+    height: 90%;
+  }
+  
+  .tabBtn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  
+  .row {
+    gap: 8px;
+  }
+  
+  .input, .btn2, .btnGhost {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Улучшение читаемости на телефонах */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  /* Убираем лишние отступы */
+  .messages {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  /* Аватарка в шапке чата */
+  .chatHeaderLeft .ava {
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Название чата */
+  .chatTitleName {
+    font-size: 14px;
+  }
+  
+  .chatTitleSub {
+    font-size: 10px;
+  }
+  
+  /* Счётчик подписчиков */
+  .subscribers-counter {
+    padding: 2px 6px;
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  
+  .subscribers-counter svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Горизонтальная ориентация на телефонах */
+@media (max-width: 900px) and (orientation: landscape) {
+  .appFrame {
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 280px;
+  }
+  
+  .messages {
+    max-height: calc(100vh - 120px);
+  }
+  
+  .msgBody {
+    max-width: 70%;
+  }
+}
+
+/* Улучшение для тач-устройств */
+@media (hover: none) and (pointer: coarse) {
+  .chatItem:hover {
+    background: transparent;
+  }
+  
+  .chatItem:active {
+    background: rgba(45,124,255,0.14);
+  }
+  
+  .bubble:hover {
+    transform: none;
+  }
+  
+  .btn:hover, .btn2:hover, .btnGhost:hover {
+    transform: none;
+  }
+  
+  /* Увеличиваем область нажатия */
+  .iconBtn, .msgActionBtn, .sendBtn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .msgActionBtn {
+    min-width: auto;
+    min-height: auto;
+    padding: 4px 8px;
+  }
+}
+
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
     <script src="https://yoomoney.ru/checkout/v2/checkout.js"></script>
-
+<!-- Favicon для вкладки браузера -->
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M50.8 17.2c-6.2-4.9-15-5.3-22-.9-3.7 2.3-6.6 5.8-8.3 9.8-1.7 4.1-2.2 8.6-1.2 12.9 2.4-5.6 7.7-9.8 13.9-10.8 3.7-.6 7.4 0 10.7 1.6-3.8 0-7.8.9-11.4 3.1-8.2 5-10.9 15.9-6 24.1.3.5.6 1 1 1.5 1.2-6.2 5-11.8 10.9-15.4 6.2-3.8 13.7-4.5 20.3-2.3 1.3-5.2-.4-10.9-4-13.7Z' fill='%232d7cff'/%3E%3Cpath d='M15 39c2.3 2.2 5.3 3.9 8.7 4.7-3.1 3-5.2 6.8-6 11 .6.6 1.3 1.2 2 1.7-1.6-6.8 1.2-14.2 7.2-18.4 2.5-1.8 5.4-2.9 8.4-3.4-7.7-2.7-15.8-.8-20.3 4.4Z' fill='rgba(45,124,255,0.2)'/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M50.8 17.2c-6.2-4.9-15-5.3-22-.9-3.7 2.3-6.6 5.8-8.3 9.8-1.7 4.1-2.2 8.6-1.2 12.9 2.4-5.6 7.7-9.8 13.9-10.8 3.7-.6 7.4 0 10.7 1.6-3.8 0-7.8.9-11.4 3.1-8.2 5-10.9 15.9-6 24.1.3.5.6 1 1 1.5 1.2-6.2 5-11.8 10.9-15.4 6.2-3.8 13.7-4.5 20.3-2.3 1.3-5.2-.4-10.9-4-13.7Z' fill='%232d7cff'/%3E%3C/svg%3E" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M50.8 17.2c-6.2-4.9-15-5.3-22-.9-3.7 2.3-6.6 5.8-8.3 9.8-1.7 4.1-2.2 8.6-1.2 12.9 2.4-5.6 7.7-9.8 13.9-10.8 3.7-.6 7.4 0 10.7 1.6-3.8 0-7.8.9-11.4 3.1-8.2 5-10.9 15.9-6 24.1.3.5.6 1 1 1.5 1.2-6.2 5-11.8 10.9-15.4 6.2-3.8 13.7-4.5 20.3-2.3 1.3-5.2-.4-10.9-4-13.7Z' fill='%232d7cff'/%3E%3C/svg%3E" />
   </head>
 
   <body>
@@ -1401,7 +2142,6 @@
               <button class="maxSubscribeBtn" id="maxSubscribeBtn">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
   MAX · 250 ₽
-</button>
 </button>
               <button class="iconBtn" id="settingsBtn" type="button" aria-label="Настройки">
                 <svg class="icon16" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -1671,6 +2411,16 @@
                 <button class="btnGhost" id="channelBadgeSetBtn" type="button">Выдать</button>
                 <button class="btnGhost" id="channelBadgeClearBtn" type="button">Убрать</button>
               </div>
+
+              <div class="label" style="margin-top:16px">MAX подписка</div>
+<div class="row">
+  <div style="flex:1 1 220px; min-width:220px">
+    <input class="input" id="maxUsername" type="text" placeholder="username (без @)" />
+  </div>
+  <button class="btnGhost" id="maxGiveBtn" type="button" style="background:linear-gradient(135deg,#7c3aed,#3b82f6);color:white">Выдать MAX</button>
+  <button class="btnGhost" id="maxRevokeBtn" type="button">Забрать MAX</button>
+</div>
+<div class="hintText">MAX подписка даёт градиентное имя, значок ⭐ и приоритет в поиске</div>
 
               <div class="label" style="margin-top:16px">Пользователи</div>
               <div id="adminUsersList"></div>
@@ -1963,7 +2713,8 @@
       let syncPullTimer = null;
       let usersLastFetchAt = 0;
       let channelsLastFetchAt = 0;
-      let lastRenderedChatId = "";
+     let lastRenderedChatId = "";
+let lastRenderedMessageIds = "";
       const appStore = {
         theme: "light",
         firebaseUse: true,
@@ -2456,149 +3207,205 @@
         const src = escapeHtml(a.url);
         const name = escapeHtml(a.name || "файл");
         let html = "";
-        if (a.type === "image") html = `<img class="msgMediaImg" src="${src}" alt="${name}" />`;
+        if (a.type === "image") html = `<img class="msgMediaImg" src="${src}" alt="${escapeHtml(name)}" />`;
         else if (a.type === "video") html = `<video class="msgMediaVideo" src="${src}" controls></video>`;
         else if (a.type === "audio" || m.kind === "voice") html = `<div class="msgAudioWrap"><audio class="msgAudio" src="${src}" controls></audio></div>`;
-        else html = `<a class="msgFileLink" href="${src}" download="${name}" target="_blank" rel="noopener noreferrer">${name}</a>`;
+        else html = `<a class="msgFileLink" href="${src}" download="${escapeHtml(name)}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}</a>`;
         return `${textPart}<div class="msgAttachment">${html}</div>`;
       }
 
-      function renderChatList() {
-        const q = (els.chatSearch.value || "").trim().toLowerCase();
-        const items = state.chats.filter((c) => !q || c.name.toLowerCase().includes(q) || (c.lastText || "").toLowerCase().includes(q) || String(c.channelUsername || "").toLowerCase().includes(q.replace(/^@+/, "")));
+function renderChatList() {
+  const q = (els.chatSearch.value || "").trim().toLowerCase();
+  const items = state.chats.filter((c) => !q || c.name.toLowerCase().includes(q) || (c.lastText || "").toLowerCase().includes(q) || String(c.channelUsername || "").toLowerCase().includes(q.replace(/^@+/, "")));
 
-        els.chatList.innerHTML = items
-          .map((c) => {
-            const active = c.id === state.activeChatId ? "active" : "";
-            const unread = c.unread > 0 ? `<div class="badge">${c.unread}</div>` : "";
-            const time = c.lastTs ? formatChatTime(c.lastTs) : "";
-            const isChannel = c.type === "channel";
-            const displayName = c.name;
-            const ava = isChannel && c.avatar
-              ? `<img class="avaImg" src="${escapeHtml(c.avatar)}" alt="" />`
-              : `<span class="avaText">${escapeHtml(isChannel ? "К" : initials(displayName))}</span>`;
-            let badge = "";
-            if (isChannel) {
-              badge = channelBadgeHtml(c);
-            } else {
-              const userEmail = findEmailByUsername(c.peerUsername || c.name || "");
-              const user = userEmail ? readUsers()[userEmail] : null;
-badge = user ? badgeMarkHtmlWithMax(user) : "";
-            }
-            return `
-              <div class="chatItem ${active}" data-id="${escapeHtml(c.id)}" role="button" tabindex="0">
-                <div class="ava">${ava}</div>
-                <div class="chatMeta">
-                  <div class="chatTopRow">
-                    <div class="chatName">${escapeHtml(displayName)}${badge}</div>
-                    <div class="chatTime">${escapeHtml(time)}</div>
-                  </div>
-                  <div class="chatBottomRow">
-                    <div class="chatLast">${escapeHtml(c.lastText || " ")}</div>
-                    ${unread}
-                  </div>
-                </div>
-              </div>
-            `;
-          })
-          .join("");
-      }
-
-      function renderChatPane() {
-        const chat = getActiveChat();
-        if (!chat) {
-          lastRenderedChatId = "";
-          els.chatAva.textContent = "G";
-          els.chatName.textContent = "Выберите чат";
-          els.chatName.classList.remove("clickable");
-          els.chatSub.textContent = "—";
-          els.messages.innerHTML = "";
-          els.messages.style.backgroundImage = "none";
-          els.messageInput.disabled = true;
-          els.attachBtn.disabled = true;
-          els.voiceBtn.disabled = true;
-          els.sendBtn.disabled = true;
-          els.messageInput.placeholder = "Сообщение";
-          return;
-        }
-        const isChannel = chat.type === "channel";
-        const previousScrollTop = els.messages.scrollTop;
-        const previousScrollHeight = els.messages.scrollHeight;
-        const previousClientHeight = els.messages.clientHeight;
-        const previousBottomGap = Math.max(0, previousScrollHeight - previousScrollTop - previousClientHeight);
-        const chatChanged = lastRenderedChatId !== chat.id;
-        const shouldStickToBottom = chatChanged || previousBottomGap < 36;
-        renderAvatar(els.chatAva, isChannel ? chat.avatar || "" : "", isChannel ? "К" : initials(chat.name));
-        const chatUserEmail = !isChannel ? findEmailByUsername(chat.peerUsername || chat.name || "") : "";
-        const chatUser = chatUserEmail ? readUsers()[chatUserEmail] : null;
-        els.chatName.classList.toggle("clickable", true);
-        els.chatName.innerHTML = `${escapeHtml(chat.name)}${isChannel ? channelBadgeHtml(chat) : (chatUser ? badgeMarkHtmlWithMax(chatUser) : "")}`;
-        if (isChannel) {
-          els.chatSub.textContent = `${chat.visibility === "public" ? "публичный" : "приватный"} • ${chat.description || "без описания"}`;
+  els.chatList.innerHTML = items
+    .map((c) => {
+      const active = c.id === state.activeChatId ? "active" : "";
+      const unread = c.unread > 0 ? `<div class="badge">${c.unread}</div>` : "";
+      const time = c.lastTs ? formatChatTime(c.lastTs) : "";
+      const isChannel = c.type === "channel";
+      const displayName = c.name;
+      
+      // ========== НОВЫЙ КОД ДЛЯ АВАТАРОК ==========
+      let ava = '';
+      if (isChannel) {
+        if (c.avatar && c.avatar.startsWith('data:image')) {
+          ava = `<img class="avaImg" src="${escapeHtml(c.avatar)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span class="avaText" style="display:none">${escapeHtml("К")}</span>`;
         } else {
-          els.chatSub.textContent = chat.online ? "в сети" : "был(а) недавно";
+          ava = `<span class="avaText">${escapeHtml("К")}</span>`;
         }
-        const canWrite = canSendToChat(chat);
-        els.messageInput.disabled = !canWrite;
-        els.attachBtn.disabled = !canWrite;
-        els.voiceBtn.disabled = !canWrite;
-        els.sendBtn.disabled = !canWrite;
-        if (!canWrite && chat.type === "channel") {
-          els.messageInput.placeholder = "Только админ может писать в канал";
+      } else {
+        const userEmail = findEmailByUsername(c.peerUsername || c.name || "");
+        const user = userEmail ? readUsers()[userEmail] : null;
+        const userAvatar = user?.profile?.avatar;
+        if (userAvatar && userAvatar.startsWith('data:image')) {
+          ava = `<img class="avaImg" src="${escapeHtml(userAvatar)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span class="avaText" style="display:none">${escapeHtml(initials(displayName))}</span>`;
         } else {
-          els.messageInput.placeholder = "Сообщение";
+          ava = `<span class="avaText">${escapeHtml(initials(displayName))}</span>`;
         }
-        els.messages.style.backgroundImage = chat.backgroundImage ? `url("${chat.backgroundImage}")` : "none";
-
-        els.messages.innerHTML = chat.messages
-          .map((m) => {
-            const senderUsername = getMessageSenderUsername(chat, m);
-            const myUsername = String(session?.username || getCurrentUser()?.username || "").trim().toLowerCase();
-            const peerUsername = String(chat?.peerUsername || chat?.name || "").trim().toLowerCase();
-            const senderLower = String(senderUsername || "").trim().toLowerCase();
-            let isMe = m.from === "me" || (myUsername && senderLower === myUsername);
-            if (!isMe && chat?.type === "chat" && senderLower) {
-              isMe = senderLower !== peerUsername;
-            }
-            const rowCls = isMe ? "msgRow me" : "msgRow";
-            const bCls = isMe ? "bubble me" : "bubble";
-            const senderEmail = findEmailByUsername(senderUsername);
-            const senderUser = senderEmail ? readUsers()[senderEmail] : null;
-            const senderBadge = senderUser ? badgeMarkHtml(senderUser) : "";
-            const senderAvatar = senderUser?.profile?.avatar
-              ? `<img class="avaImg" src="${escapeHtml(senderUser.profile.avatar)}" alt="" />`
-              : `<span class="avaText">${escapeHtml(initials(senderUsername))}</span>`;
-            const msgKey = messageSyncKey(m);
-            const canDeleteLocal = isMe || (chat.type === "channel" && isAdminMode());
-            const canDeleteBoth = isMe && chat.type === "chat";
-            return `
-              <div class="${rowCls}">
-                <div class="msgRowSide ava">${senderAvatar}</div>
-                <div class="msgBody">
-                  <div class="msgTop">
-                    <button class="msgSenderBtn" type="button" data-profile-user="${escapeHtml(senderUsername)}">${escapeHtml(senderUsername)}${senderBadge}</button>
-                    <div class="msgMeta">${escapeHtml(formatTime(m.ts))}</div>
-                    ${canDeleteLocal ? `<div class="msgActions"><button class="msgActionBtn" type="button" data-msg-delete-local="${escapeHtml(msgKey)}">У себя</button>${canDeleteBoth ? `<button class="msgActionBtn danger" type="button" data-msg-delete-both="${escapeHtml(msgKey)}">У всех</button>` : ""}</div>` : ""}
-                  </div>
-                  <div class="${bCls}">
-                    ${renderMessageBody(m)}
-                  </div>
-                </div>
-              </div>
-            `;
-          })
-          .join("");
-
-        requestAnimationFrame(() => {
-          if (shouldStickToBottom) {
-            els.messages.scrollTop = els.messages.scrollHeight;
-          } else {
-            const nextTop = Math.max(0, els.messages.scrollHeight - previousClientHeight - previousBottomGap);
-            els.messages.scrollTop = nextTop;
-          }
-        });
-        lastRenderedChatId = chat.id;
       }
+      // ========== КОНЕЦ НОВОГО КОДА ==========
+      
+      let badge = "";
+      if (isChannel) {
+        badge = channelBadgeHtml(c);
+      } else {
+        const userEmail = findEmailByUsername(c.peerUsername || c.name || "");
+        const user = userEmail ? readUsers()[userEmail] : null;
+        badge = user ? badgeMarkHtmlWithMax(user) : "";
+      }
+      return `
+        <div class="chatItem ${active}" data-id="${escapeHtml(c.id)}" role="button" tabindex="0">
+          <div class="ava">${ava}</div>
+          <div class="chatMeta">
+            <div class="chatTopRow">
+              <div class="chatName">${escapeHtml(displayName)}${badge}</div>
+              <div class="chatTime">${escapeHtml(time)}</div>
+            </div>
+            <div class="chatBottomRow">
+              <div class="chatLast">${escapeHtml(c.lastText || " ")}</div>
+              ${unread}
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderChatPane() {
+  const chat = getActiveChat();
+  if (!chat) {
+    lastRenderedChatId = "";
+    lastRenderedMessageIds = "";
+    els.chatAva.textContent = "G";
+    els.chatName.textContent = "Выберите чат";
+    els.chatName.classList.remove("clickable");
+    els.chatSub.textContent = "—";
+    els.messages.innerHTML = "";
+    els.messages.style.backgroundImage = "none";
+    els.messageInput.disabled = true;
+    els.attachBtn.disabled = true;
+    els.voiceBtn.disabled = true;
+    els.sendBtn.disabled = true;
+    els.messageInput.placeholder = "Сообщение";
+    return;
+  }
+  
+  const isChannel = chat.type === "channel";
+  const previousScrollTop = els.messages.scrollTop;
+  const previousScrollHeight = els.messages.scrollHeight;
+  const previousClientHeight = els.messages.clientHeight;
+  const previousBottomGap = Math.max(0, previousScrollHeight - previousScrollTop - previousClientHeight);
+  const chatChanged = lastRenderedChatId !== chat.id;
+  const shouldStickToBottom = chatChanged || previousBottomGap < 36;
+  
+  // Проверяем, изменились ли сообщения
+  const currentMessageIds = chat.messages.map(m => messageSyncKey(m)).join('|');
+  const messagesChanged = currentMessageIds !== lastRenderedMessageIds;
+  
+  renderAvatar(els.chatAva, isChannel ? chat.avatar || "" : "", isChannel ? "К" : initials(chat.name));
+  const chatUserEmail = !isChannel ? findEmailByUsername(chat.peerUsername || chat.name || "") : "";
+  const chatUser = chatUserEmail ? readUsers()[chatUserEmail] : null;
+  els.chatName.classList.toggle("clickable", true);
+  els.chatName.innerHTML = `${escapeHtml(chat.name)}${isChannel ? channelBadgeHtml(chat) : (chatUser ? badgeMarkHtmlWithMax(chatUser) : "")}`;
+
+  if (isChannel) {
+    let subscribersCount = 0;
+    const allUsers = readUsers();
+    for (const userEmail in allUsers) {
+      const userData = appStore.dataByEmail[userEmail];
+      if (userData && userData.joinedPublicChannels) {
+        if (userData.joinedPublicChannels.includes(chat.channelId)) {
+          subscribersCount++;
+        }
+      }
+    }
+    for (const userEmail in allUsers) {
+      const userData = appStore.dataByEmail[userEmail];
+      if (userData && userData.chats) {
+        const hasPrivateChannel = userData.chats.some(c => c.type === "channel" && c.channelId === chat.channelId);
+        if (hasPrivateChannel && !userData.joinedPublicChannels?.includes(chat.channelId)) {
+          subscribersCount++;
+        }
+      }
+    }
+    const subsHtml = `<span class="subscribers-counter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="subscribers-count">${subscribersCount}</span></span>`;
+    els.chatSub.innerHTML = `${chat.visibility === "public" ? "публичный" : "приватный"} • ${chat.description || "без описания"} ${subsHtml}`;
+  } else {
+    els.chatSub.textContent = chat.online ? "в сети" : "был(а) недавно";
+  }
+  
+  const canWrite = canSendToChat(chat);
+  els.messageInput.disabled = !canWrite;
+  els.attachBtn.disabled = !canWrite;
+  els.voiceBtn.disabled = !canWrite;
+  els.sendBtn.disabled = !canWrite;
+  if (!canWrite && chat.type === "channel") {
+    els.messageInput.placeholder = "Только админ может писать в канал";
+  } else {
+    els.messageInput.placeholder = "Сообщение";
+  }
+  els.messages.style.backgroundImage = chat.backgroundImage ? `url("${chat.backgroundImage}")` : "none";
+
+  // ТОЛЬКО ЕСЛИ СООБЩЕНИЯ ИЗМЕНИЛИСЬ — перерисовываем
+  if (messagesChanged || chatChanged) {
+    els.messages.innerHTML = chat.messages
+      .map((m) => {
+        const senderUsername = getMessageSenderUsername(chat, m);
+        const myUsername = String(session?.username || getCurrentUser()?.username || "").trim().toLowerCase();
+        const peerUsername = String(chat?.peerUsername || chat?.name || "").trim().toLowerCase();
+        const senderLower = String(senderUsername || "").trim().toLowerCase();
+        let isMe = m.from === "me" || (myUsername && senderLower === myUsername);
+        if (!isMe && chat?.type === "chat" && senderLower) {
+          isMe = senderLower !== peerUsername;
+        }
+        const rowCls = isMe ? "msgRow me" : "msgRow";
+        const bCls = isMe ? "bubble me" : "bubble";
+        const senderEmail = findEmailByUsername(senderUsername);
+        const senderUser = senderEmail ? readUsers()[senderEmail] : null;
+        const senderBadge = senderUser ? badgeMarkHtml(senderUser) : "";
+        let senderAvatar = '';
+        if (senderUser?.profile?.avatar && senderUser.profile.avatar.startsWith('data:image')) {
+          senderAvatar = `<img class="avaImg" src="${escapeHtml(senderUser.profile.avatar)}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span class="avaText" style="display:none">${escapeHtml(initials(senderUsername))}</span>`;
+        } else {
+          senderAvatar = `<span class="avaText">${escapeHtml(initials(senderUsername))}</span>`;
+        }
+        const msgKey = messageSyncKey(m);
+        const canDeleteLocal = isMe || (chat.type === "channel" && isAdminMode());
+        const canDeleteBoth = isMe && chat.type === "chat";
+        return `
+          <div class="${rowCls}" data-msg-id="${escapeHtml(msgKey)}">
+            <div class="msgRowSide ava">${senderAvatar}</div>
+            <div class="msgBody">
+              <div class="msgTop">
+                <button class="msgSenderBtn" type="button" data-profile-user="${escapeHtml(senderUsername)}">${escapeHtml(senderUsername)}${senderBadge}</button>
+                <div class="msgMeta">${escapeHtml(formatTime(m.ts))}</div>
+                ${canDeleteLocal ? `<div class="msgActions"><button class="msgActionBtn" type="button" data-msg-delete-local="${escapeHtml(msgKey)}">У себя</button>${canDeleteBoth ? `<button class="msgActionBtn danger" type="button" data-msg-delete-both="${escapeHtml(msgKey)}">У всех</button>` : ""}</div>` : ""}
+              </div>
+              <div class="${bCls}">
+                ${renderMessageBody(m)}
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+    
+    lastRenderedMessageIds = currentMessageIds;
+  }
+
+  requestAnimationFrame(() => {
+    if (shouldStickToBottom) {
+      els.messages.scrollTop = els.messages.scrollHeight;
+    } else {
+      const nextTop = Math.max(0, els.messages.scrollHeight - previousClientHeight - previousBottomGap);
+      els.messages.scrollTop = nextTop;
+    }
+  });
+  
+  lastRenderedChatId = chat.id;
+}
 
       function setActiveChat(chatId) {
         const exists = state.chats.some((c) => c.id === chatId);
@@ -2826,38 +3633,54 @@ function badgeMarkHtmlWithMax(u) {
   const maxSub = u?.email ? getUserMax(u.email) : null;
   let maxHtml = "";
   if (maxSub) {
-    const expireDate = new Date(maxSub.exp);
-    const formattedDate = expireDate.toLocaleDateString("ru-RU", { year: "numeric", month: "short", day: "numeric" });
-    maxHtml = `<span class="maxBadge" title="MAX подписка до ${formattedDate}">⭐ MAX · ${formattedDate}</span>`;
+    // Форматируем дату ПОКУПКИ (а не окончания)
+    const purchaseDate = new Date(maxSub.at);
+    const formattedDate = purchaseDate.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+    maxHtml = `<span class="maxBadge" title="MAX подписка • оформлена ${formattedDate}">⭐ MAX · с ${formattedDate}</span>`;
   }
   if (!c && !maxHtml) return "";
   return `${c ? `<span class="check ${c}"></span>` : ""}${maxHtml}`;
 }
 
-      function renderAvatar(el, avatarDataUrl, textFallback) {
-        if (!el) return;
-        const existingImg = el.querySelector("img");
-        const existingText = el.querySelector(".avaText");
-        const hasImg = !!avatarDataUrl;
-        if (hasImg) {
-          if (!existingImg) {
-            const img = document.createElement("img");
-            img.className = "avaImg";
-            img.alt = "";
-            el.textContent = "";
-            el.appendChild(img);
-          }
-          el.querySelector("img").src = avatarDataUrl;
-        } else {
-          if (existingImg) existingImg.remove();
-          if (!existingText) {
-            const sp = document.createElement("span");
-            sp.className = "avaText";
-            el.appendChild(sp);
-          }
-          el.querySelector(".avaText").textContent = textFallback || "G";
-        }
-      }
+function renderAvatar(el, avatarDataUrl, textFallback) {
+  if (!el) return;
+  const existingImg = el.querySelector("img");
+  const existingText = el.querySelector(".avaText");
+  const hasImg = avatarDataUrl && avatarDataUrl.startsWith("data:image");
+  
+  if (hasImg) {
+    if (!existingImg) {
+      // Очищаем элемент и добавляем img
+      el.innerHTML = '';
+      const img = document.createElement("img");
+      img.className = "avaImg";
+      img.alt = "";
+      img.onerror = () => {
+        // Если изображение не загрузилось, показываем текст
+        renderAvatar(el, "", textFallback);
+      };
+      el.appendChild(img);
+    }
+    const imgEl = el.querySelector("img");
+    if (imgEl) imgEl.src = avatarDataUrl;
+    // Скрываем текстовый элемент если есть
+    const textSpan = el.querySelector(".avaText");
+    if (textSpan) textSpan.style.display = "none";
+  } else {
+    // Удаляем img если есть
+    const imgEl = el.querySelector("img");
+    if (imgEl) imgEl.remove();
+    
+    let textSpan = el.querySelector(".avaText");
+    if (!textSpan) {
+      textSpan = document.createElement("span");
+      textSpan.className = "avaText";
+      el.appendChild(textSpan);
+    }
+    textSpan.style.display = "block";
+    textSpan.textContent = textFallback || "G";
+  }
+}
 
       function showMaintenance() {
         els.authView.classList.add("hidden");
@@ -2882,47 +3705,62 @@ function badgeMarkHtmlWithMax(u) {
         setMode(false);
       }
 
-      function syncJoinedPublicChannels() {
-        if (!state) return;
-        if (!Array.isArray(state.joinedPublicChannels)) state.joinedPublicChannels = [];
-        const registry = readChannels();
-        const byId = new Map(registry.map((c) => [c.id, c]));
-        state.joinedPublicChannels = state.joinedPublicChannels.filter((id) => byId.has(id));
-        for (const id of state.joinedPublicChannels) {
-          const ch = byId.get(id);
-          const exists = state.chats.some((c) => c.type === "channel" && c.channelId === id);
-          if (!exists) {
-            state.chats.unshift({
-              id: "ch_" + id,
-              type: "channel",
-              channelId: id,
-              visibility: ch.visibility === "private" ? "private" : "public",
-              name: ch.name,
-              description: ch.description || "",
-              avatar: ch.avatar || "",
-              channelUsername: ch.channelUsername || "",
-              inviteLink: ch.inviteLink || "",
-              ownerUsername: ch.ownerUsername || "admin",
-              badge: !!ch.badge,
-              online: false,
-              unread: 0,
-              messages: [{ id: "m1", from: "them", text: `${ch.visibility === "private" ? "Вы вошли в приватный канал " : "Вы присоединились к каналу "}${ch.name}`, ts: Date.now() }],
-            });
-            continue;
-          }
-          const local = state.chats.find((c) => c.type === "channel" && c.channelId === id);
-          if (!local) continue;
-          local.name = ch.name || local.name;
-          local.description = ch.description || "";
-          local.avatar = ch.avatar || "";
-          local.channelUsername = ch.channelUsername || "";
-          local.inviteLink = ch.inviteLink || "";
-          local.visibility = ch.visibility === "private" ? "private" : "public";
-          local.ownerUsername = ch.ownerUsername || local.ownerUsername;
-          local.badge = !!ch.badge;
-        }
+function syncJoinedPublicChannels() {
+  if (!state) return;
+  if (!Array.isArray(state.joinedPublicChannels)) state.joinedPublicChannels = [];
+  const registry = readChannels();
+  const byId = new Map(registry.map((c) => [c.id, c]));
+  state.joinedPublicChannels = state.joinedPublicChannels.filter((id) => byId.has(id));
+  for (const id of state.joinedPublicChannels) {
+    const ch = byId.get(id);
+    const exists = state.chats.some((c) => c.type === "channel" && c.channelId === id);
+    if (!exists) {
+      // ========== ИСПРАВЛЕНО: загружаем все сообщения канала, а не одно приветственное ==========
+      const channelMessages = (ch.messages && Array.isArray(ch.messages)) ? [...ch.messages] : [];
+      // Если нет сообщений, добавляем приветственное
+      if (channelMessages.length === 0) {
+        channelMessages.push({ id: "m1", from: "them", text: `${ch.visibility === "private" ? "Вы вошли в приватный канал " : "Вы присоединились к каналу "}${ch.name}`, ts: Date.now() });
       }
-
+      state.chats.unshift({
+        id: "ch_" + id,
+        type: "channel",
+        channelId: id,
+        visibility: ch.visibility === "private" ? "private" : "public",
+        name: ch.name,
+        description: ch.description || "",
+        avatar: ch.avatar || "",
+        channelUsername: ch.channelUsername || "",
+        inviteLink: ch.inviteLink || "",
+        ownerUsername: ch.ownerUsername || "admin",
+        badge: !!ch.badge,
+        online: false,
+        unread: 0,
+        messages: channelMessages, // ← теперь все сообщения
+      });
+      continue;
+    }
+    // ... остальной код без изменений
+    const local = state.chats.find((c) => c.type === "channel" && c.channelId === id);
+    if (!local) continue;
+    local.name = ch.name || local.name;
+    local.description = ch.description || "";
+    local.avatar = ch.avatar || "";
+    local.channelUsername = ch.channelUsername || "";
+    local.inviteLink = ch.inviteLink || "";
+    local.visibility = ch.visibility === "private" ? "private" : "public";
+    local.ownerUsername = ch.ownerUsername || local.ownerUsername;
+    local.badge = !!ch.badge;
+    // ========== ДОБАВЛЕНО: синхронизация сообщений канала ==========
+    if (ch.messages && Array.isArray(ch.messages)) {
+      const existingIds = new Set(local.messages.map(m => m.id));
+      const newMessages = ch.messages.filter(m => !existingIds.has(m.id));
+      if (newMessages.length) {
+        local.messages.push(...newMessages);
+        local.messages.sort((a, b) => a.ts - b.ts);
+      }
+    }
+  }
+}
 
       function showApp() {
         els.maintenanceView.classList.add("hidden");
@@ -2941,6 +3779,7 @@ function badgeMarkHtmlWithMax(u) {
 
         renderAvatar(els.userAva, avatar, initials(username));
         els.userLine.innerHTML = `<span class="userLineName">@${escapeHtml(u?.username || session?.username || "user")}</span>${badge}`;
+        updateMaxDisplay();
 
         state = readData();
         if (!state || !Array.isArray(state.chats)) {
@@ -3079,20 +3918,36 @@ function badgeMarkHtmlWithMax(u) {
         return list.find((c) => (c.visibility || "public") === "public" && String(c.name || "").trim().toLowerCase() === q) || null;
       }
 
-      function joinPublicChannel(id) {
-        const list = readChannels();
-        const ch = list.find((c) => c.id === id);
-        if (!ch) return;
-        if (!Array.isArray(state.joinedPublicChannels)) state.joinedPublicChannels = [];
-        if (!state.joinedPublicChannels.includes(id)) state.joinedPublicChannels.push(id);
-        syncJoinedPublicChannels();
-        writeData(state);
-        updateDerived();
-        renderChatList();
-        renderChatPane();
-        renderPublicChannels();
-        showToast("Канал добавлен");
-      }
+// Найди эту функцию и ЗАМЕНИ её полностью:
+function joinPublicChannel(id) {
+  const list = readChannels();
+  const ch = list.find((c) => c.id === id);
+  if (!ch) return;
+  if (!Array.isArray(state.joinedPublicChannels)) state.joinedPublicChannels = [];
+  if (!state.joinedPublicChannels.includes(id)) state.joinedPublicChannels.push(id);
+  
+  // ========== ДОБАВЛЕНО: загрузка истории канала ==========
+  // Если у канала есть сохранённые сообщения, загружаем их
+  if (ch.messages && Array.isArray(ch.messages) && ch.messages.length > 0) {
+    const existingChat = state.chats.find(c => c.type === "channel" && c.channelId === id);
+    if (existingChat) {
+      // Объединяем существующие сообщения с новыми, избегая дубликатов
+      const existingIds = new Set(existingChat.messages.map(m => m.id));
+      const newMessages = ch.messages.filter(m => !existingIds.has(m.id));
+      existingChat.messages = [...existingChat.messages, ...newMessages];
+      existingChat.messages.sort((a, b) => a.ts - b.ts);
+    }
+  }
+  // ========== КОНЕЦ ДОБАВЛЕНИЯ ==========
+  
+  syncJoinedPublicChannels();
+  writeData(state);
+  updateDerived();
+  renderChatList();
+  renderChatPane();
+  renderPublicChannels();
+  showToast("Канал добавлен");
+}
 
       function createChannel() {
         const name = normalizeChannelName(els.menuChannelName.value || "");
@@ -3305,12 +4160,14 @@ function badgeMarkHtmlWithMax(u) {
             const badge = badgeMarkHtmlWithMax(u);
             const blocked = u.blocked ? `<span class="pill" style="border-color:rgba(255,59,59,0.35);background:rgba(255,59,59,0.10)">заблокирован</span>` : "";
             const btnBlock = u.blocked ? "Разблок." : "Блок";
+const maxSub = getUserMax(u.email);
+const maxIndicator = maxSub ? `<span class="maxBadge" style="margin-left:6px">⭐ MAX</span>` : "";
             return `
               <div class="panel" style="padding:12px;margin-bottom:10px">
                 <div class="rowBetween">
                   <div style="min-width:0">
                     <div style="display:flex;align-items:center;gap:8px;min-width:0">
-                      <div style="font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${escapeHtml(u.username || "user")}</div>
+<div style="font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${escapeHtml(u.username || "user")}${maxIndicator}</div>
                       ${badge}
                       ${blocked}
                     </div>
@@ -4193,6 +5050,57 @@ function badgeMarkHtmlWithMax(u) {
         showToast("Firebase включён");
       });
 
+      // ========== MAX ПОДПИСКА (АДМИНКА) ==========
+function giveMaxSubscription(username) {
+  const email = findEmailByUsername(username);
+  if (!email) {
+    showToast("Пользователь не найден");
+    return false;
+  }
+  const subs = getMaxSub();
+  // Подписка НАВСЕГДА - ставим exp на 100 лет вперёд
+  const expireDate = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+  subs[email] = { 
+    exp: expireDate, 
+    at: Date.now(),
+    forever: true  // флаг "навсегда"
+  };
+  saveMaxSub(subs);
+  
+  if (currentEmailLower() === email) {
+    updateMaxDisplay();
+  }
+  renderAdminUsersList();
+  
+  // Форматируем дату покупки
+  const purchaseDate = new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  showToast(`✅ MAX подписка (навсегда) выдана @${username} • ${purchaseDate}`);
+  return true;
+}
+
+// Добавь обработчики для новых кнопок (после всех других обработчиков)
+const maxGiveBtn = document.getElementById("maxGiveBtn");
+const maxRevokeBtn = document.getElementById("maxRevokeBtn");
+const maxUsernameInput = document.getElementById("maxUsername");
+
+if (maxGiveBtn) {
+  maxGiveBtn.addEventListener("click", () => {
+    const username = maxUsernameInput?.value?.trim() || "";
+    if (!username) return showToast("Введите username");
+    giveMaxSubscription(username);
+    maxUsernameInput.value = "";
+  });
+}
+
+if (maxRevokeBtn) {
+  maxRevokeBtn.addEventListener("click", () => {
+    const username = maxUsernameInput?.value?.trim() || "";
+    if (!username) return showToast("Введите username");
+    revokeMaxSubscription(username);
+    maxUsernameInput.value = "";
+  });
+}
+
       async function bootstrap() {
         const savedTheme = appStore.theme || "light";
         setTheme(savedTheme);
@@ -4231,8 +5139,30 @@ const YOOMONEY_WALLET = "4100118609737762"
 
 function getMaxSub(){try{return JSON.parse(localStorage.getItem("golub_max_subs")||"{}")}catch{return{}}}
 function saveMaxSub(s){localStorage.setItem("golub_max_subs",JSON.stringify(s))}
-function getUserMax(e){if(!e)return null;let s=getMaxSub(),u=s[e];if(u&&u.exp&&u.exp<Date.now()){delete s[e];saveMaxSub(s);return null}return u}
-function setUserMax(e){let s=getMaxSub(),n=Date.now()+30*24*60*60*1000;s[e]={exp:n,at:Date.now()};saveMaxSub(s);return s[e]}
+function getUserMax(e){
+  if(!e) return null;
+  let s = getMaxSub();
+  let u = s[e];
+  if(u && u.exp && u.exp < Date.now()){
+    // Если просрочена - удаляем
+    delete s[e];
+    saveMaxSub(s);
+    return null;
+  }
+  return u;
+}
+function setUserMax(e){
+  let s = getMaxSub();
+  // Подписка НАВСЕГДА
+  let expireDate = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
+  s[e] = { 
+    exp: expireDate, 
+    at: Date.now(),
+    forever: true
+  };
+  saveMaxSub(s);
+  return s[e];
+}
 function getMaxBadge(e){let u=getUserMax(e);if(!u)return "";let d=new Date(u.exp);return `<span class="maxBadge" title="MAX до ${d.toLocaleDateString("ru-RU")}">⭐ MAX · ${d.toLocaleDateString("ru-RU",{month:"short",day:"numeric"})}</span>`}
 function hasMax(e){return!!getUserMax(e)}
 
@@ -4245,6 +5175,7 @@ function showMaxModal(){
       <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v8H4v-8M12 2v4M12 18v4"/><rect x="2" y="6" width="20" height="8" rx="2"/></svg><span>🏷️ <strong>Эксклюзивный значок</strong> ⭐ MAX с датой покупки</span></div>
       <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg><span>⏱️ <strong>Приоритет в поиске</strong> — ваши чаты выше в списке</span></div>
       <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg><span>👑 <strong>Поддержка проекта</strong> — помогаете развитию golub</span></div>
+      <div class="maxFeature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg><span>♾️ <strong>Навсегда</strong> — один платёж, доступ навсегда</span></div>
       <div class="maxPrice" id="maxPayBtn">💳 Оплатить 250 ₽ (ЮMoney)</div>
       <button class="maxClose" id="maxCloseBtn">Закрыть</button>
     </div>
@@ -4255,10 +5186,10 @@ function showMaxModal(){
     let email=session.email.toLowerCase();
     if(hasMax(email)){showToast("У вас уже есть MAX подписка!");modal.remove();return}
     let form=document.createElement("form");form.method="POST";form.action="https://yoomoney.ru/quickpay/confirm.xml";form.target="_blank";
-    [{name:"receiver",value:YOOMONEY_WALLET},{name:"quickpay-form",value:"shop"},{name:"targets",value:`MAX подписка для @${session.username}`},{name:"paymentType",value:"AC"},{name:"sum",value:"250"},{name:"label",value:`${email}|${session.username}|${Date.now()}`},{name:"successURL",value:window.location.href}].forEach(p=>{let i=document.createElement("input");i.type="hidden";i.name=p.name;i.value=p.value;form.appendChild(i)});
+    [{name:"receiver",value:YOOMONEY_WALLET},{name:"quickpay-form",value:"shop"},{name:"targets",value:`MAX подписка (навсегда) для @${session.username}`},{name:"paymentType",value:"AC"},{name:"sum",value:"250"},{name:"label",value:`${email}|${session.username}|${Date.now()}`},{name:"successURL",value:window.location.href}].forEach(p=>{let i=document.createElement("input");i.type="hidden";i.name=p.name;i.value=p.value;form.appendChild(i)});
     document.body.appendChild(form);form.submit();document.body.removeChild(form);
     localStorage.setItem("golub_max_pending",email);
-    let check=setInterval(()=>{if(hasMax(email)){clearInterval(check);localStorage.removeItem("golub_max_pending");showToast("✅ MAX активирована!");modal.remove();updateMaxDisplay();renderChatList();renderChatPane()}},3000);
+    let check=setInterval(()=>{if(hasMax(email)){clearInterval(check);localStorage.removeItem("golub_max_pending");showToast("✅ MAX подписка (навсегда) активирована!");modal.remove();updateMaxDisplay();renderChatList();renderChatPane()}},3000);
     setTimeout(()=>clearInterval(check),180000);
     showToast("💰 Откроется окно оплаты");
   };
@@ -4267,18 +5198,19 @@ function showMaxModal(){
 }
 
 function updateMaxDisplay(){
-  let btn=document.getElementById("maxSubscribeBtn");
-  if(!btn)return;
-  let email=session?.email?.toLowerCase();
-  let sub=getUserMax(email);
+  let btn = document.getElementById("maxSubscribeBtn");
+  if(!btn) return;
+  let email = session?.email?.toLowerCase();
+  let sub = getUserMax(email);
   if(sub){
-    let days=Math.ceil((sub.exp-Date.now())/86400000);
-    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>⭐ MAX · ${days} дн.`;
+    // Есть подписка - скрываем кнопку
+    btn.style.display = "none";
   } else {
-    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>MAX · 250 ₽`;
+    // Нет подписки - показываем кнопку
+    btn.style.display = "flex";
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>MAX · 250 ₽`;
   }
 }
-
 setTimeout(()=>{
   let btn=document.getElementById("maxSubscribeBtn");
   if(btn)btn.onclick=()=>{
@@ -4290,3 +5222,4 @@ setTimeout(()=>{
     </script>
   </body>
 </html>
+
